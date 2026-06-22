@@ -159,20 +159,34 @@ export default function Home() {
         })
       })
 
-      const data = (await resp.json()) as GenerateResponse | ErrorResponse
+      let data: GenerateResponse | ErrorResponse
+      try {
+        data = (await resp.json()) as GenerateResponse | ErrorResponse
+      } catch (jsonError) {
+        throw new Error('Server returned invalid response. Please try again later.')
+      }
 
       if (!resp.ok) {
         const errData = data as ErrorResponse
         const message =
           (errData.details && errData.details.length > 0)
-            ? `${errData.error}: ${errData.details.join(' ')}`
+            ? `${errData.details.join(' ')}`
             : errData.error
 
+        if (resp.status === 401) {
+          throw new Error(`Authentication failed: ${message}`)
+        }
         if (resp.status === 402) {
-          throw new Error(`Limit reached. ${message}`)
+          throw new Error(`Daily limit reached. ${message}`)
         }
         if (resp.status === 429) {
-          throw new Error(`Rate limited. ${message}`)
+          throw new Error(`Rate limited: ${message}`)
+        }
+        if (resp.status === 502) {
+          throw new Error(`API error: ${message}`)
+        }
+        if (resp.status === 503) {
+          throw new Error(`Network error: ${message}`)
         }
         throw new Error(message || 'Request failed.')
       }

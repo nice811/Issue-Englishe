@@ -578,6 +578,8 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error('[generate] Generation failed:', error)
 
+    const err = error as any
+
     // 处理 API Key 未设置的错误
     if ((error as Error).message.includes('DEEPSEEK_API_KEY')) {
       return NextResponse.json(
@@ -587,17 +589,33 @@ export async function POST(req: NextRequest) {
     }
 
     // 处理 API 调用错误
-    if ((error as any)?.status === 401 || (error as any)?.message?.includes('Incorrect API key')) {
+    if (err?.status === 401 || (err?.message?.includes('Incorrect API key') || err?.message?.includes('Invalid API key'))) {
       return NextResponse.json(
         { error: 'AUTHENTICATION_ERROR', details: ['Invalid DeepSeek API key. Please check your configuration.'] },
         { status: 401 }
       )
     }
 
-    if ((error as any)?.status === 429) {
+    if (err?.status === 429) {
       return NextResponse.json(
         { error: 'RATE_LIMITED', details: ['DeepSeek API rate limit exceeded. Please try again later.'] },
         { status: 429 }
+      )
+    }
+
+    // 处理网络/连接错误
+    if (err?.cause?.code === 'ECONNRESET' || err?.cause?.code === 'ETIMEDOUT' || err?.code === 'ECONNRESET' || err?.code === 'ETIMEDOUT') {
+      return NextResponse.json(
+        { error: 'NETWORK_ERROR', details: ['Network connection error. Please try again later.'] },
+        { status: 503 }
+      )
+    }
+
+    // 处理 HTML 响应（可能是重定向或错误页面）
+    if (err?.message?.includes('<!DOCTYPE') || err?.message?.includes('<html')) {
+      return NextResponse.json(
+        { error: 'API_RESPONSE_ERROR', details: ['Received unexpected response from DeepSeek API. Please check your API key and network configuration.'] },
+        { status: 502 }
       )
     }
 
