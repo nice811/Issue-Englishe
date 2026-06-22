@@ -1,0 +1,66 @@
+{
+  "common": {
+    "generate": "生成 Generate",
+    "copy": "复制 Copy",
+    "download": "下载 .md Download",
+    "preview": "预览 Preview",
+    "usSpelling": "美式拼写 US",
+    "ukSpelling": "英式拼写 UK · Pro",
+    "suggestLabels": "建议标签 Suggest Labels",
+    "noDataStored": "我们不会保存你的原始内容 We do not store your input",
+    "usesRemaining": "次使用剩余 uses remaining today",
+    "upgrade": "升级 Pro Upgrade →",
+    "freeTierWatermark": "免费版 — 将附水印 Free tier — watermark will be added",
+    "proTierNoWatermark": "Pro 版 — 已去水印 Pro tier — watermark removed",
+    "loading": "生成中 Generating...",
+    "copied": "已复制 Copied!",
+    "required": "必填 Required",
+    "optional": "可选 Optional"
+  },
+  "form": {
+    "title": "标题 Title",
+    "titlePlaceholder": "简要描述问题 Brief summary of the issue",
+    "titleHint": "建议 ≤80 字符 Keep under 80 chars",
+    "description": "问题描述 Description",
+    "descriptionPlaceholder": "发生了什么？在哪里？请清晰描述 What went wrong? Where? (≥30 chars)",
+    "steps": "复现步骤 Steps to Reproduce",
+    "stepPlaceholder": "描述此步骤 Describe this step...",
+    "addStep": "添加步骤 Add step",
+    "expected": "期望行为 Expected",
+    "expectedPlaceholder": "应该发生什么 What should happen?",
+    "actual": "实际行为 Actual",
+    "actualPlaceholder": "实际发生了什么 What actually happened?",
+    "environment": "环境信息 Environment",
+    "os": "操作系统 OS",
+    "osPlaceholder": "例如 macOS 14 e.g. macOS 14",
+    "appVersion": "应用版本 App Version",
+    "versionPlaceholder": "例如 1.2.3 e.g. 1.2.3",
+    "dependencies": "依赖 Dependencies",
+    "depsPlaceholder": "react 18.2.0, next 14.2.0",
+    "logs": "日志 Logs",
+    "logsPlaceholder": "粘贴错误日志 Paste error logs",
+    "logsHint": "超 2000 字符自动截断 Auto-truncated at 2000 chars",
+    "options": "选项 Options",
+    "spelling": "拼写 Spelling",
+    "accessToken": "访问令牌 Access Token",
+    "tokenPlaceholder": "留空使用免费版 Leave empty for free tier",
+    "tokenHint": "Pro 用户：输入令牌 Pro users: enter token"
+  },
+  "preview": {
+    "title": "Issue 预览 Preview",
+    "emptyState": "填写表单并点击「生成」Fill in the form and click Generate",
+    "suggestedLabels": "建议标签 Suggested Labels"
+  },
+  "footer": {
+    "copyright": "© 2026 Issue Englisher — 不存储输入 we never store your input",
+    "freeProInfo": "免费版 10/天 · Pro 200/天 Free: 10/day · Pro: 200/day",
+    "privacy": "隐私 Privacy",
+    "terms": "条款 Terms"
+  },
+  "errors": {
+    "limitReached": "额度已达 Limit reached",
+    "rateLimited": "请求过多 Rate limited",
+    "requestFailed": "请求失败 Request failed",
+    "invalidToken": "令牌无效 Invalid token"
+  }
+}
