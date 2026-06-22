@@ -538,8 +538,7 @@ export async function POST(req: NextRequest) {
     const completion = await client.chat.completions.create({
       model: 'deepseek-chat',
       messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
-        { role: 'developer', content: buildDeveloperPrompt(spelling, watermark) },
+        { role: 'system', content: SYSTEM_PROMPT + '\n\n' + buildDeveloperPrompt(spelling, watermark) },
         { role: 'user', content: buildUserPrompt(body) + FEW_SHOT_EXAMPLES }
       ],
       temperature: 0.3,
