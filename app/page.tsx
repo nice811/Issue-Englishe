@@ -677,7 +677,7 @@ export default function Home() {
                   <p className="text-sm text-slate-600 mb-3">{lang === 'zh' ? '扫码添加客服开通 Pro' : 'Scan to upgrade to Pro'}</p>
                   <div className="w-32 h-32 mx-auto bg-white rounded-lg border border-slate-200 flex items-center justify-center mb-3 overflow-hidden">
                     <img 
-                      src="https://picui.ogmua.cn/s1/2026/06/23/6a3a01c5adea1.webp" 
+                      src="https://neeko-copilot.bytedance.net/api/text_to_image?prompt=WeChat%20QR%20code%20for%20customer%20service%2C%20clean%20white%20background%2C%20professional%2C%20minimalist&image_size=square" 
                       alt="WeChat QR Code" 
                       className="w-full h-full object-cover"
                     />
