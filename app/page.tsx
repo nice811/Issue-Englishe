@@ -676,11 +676,28 @@ export default function Home() {
                 <div className="text-center">
                   <p className="text-sm text-slate-600 mb-3">{lang === 'zh' ? '扫码添加客服开通 Pro' : 'Scan to upgrade to Pro'}</p>
                   <div className="w-32 h-32 mx-auto bg-white rounded-lg border border-slate-200 flex items-center justify-center mb-3 overflow-hidden">
-                    <img 
-                      src="https://neeko-copilot.bytedance.net/api/text_to_image?prompt=WeChat%20QR%20code%20for%20customer%20service%2C%20clean%20white%20background%2C%20professional%2C%20minimalist&image_size=square" 
-                      alt="WeChat QR Code" 
-                      className="w-full h-full object-cover"
-                    />
+                    <svg viewBox="0 0 100 100" className="w-full h-full bg-white">
+                      <rect width="100" height="100" fill="white"/>
+                      <rect x="8" y="8" width="20" height="20" fill="#333" rx="2"/>
+                      <rect x="12" y="12" width="6" height="6" fill="white"/>
+                      <rect x="20" y="12" width="6" height="6" fill="white"/>
+                      <rect x="12" y="20" width="14" height="6" fill="white"/>
+                      <rect x="72" y="8" width="20" height="20" fill="#333" rx="2"/>
+                      <rect x="8" y="72" width="20" height="20" fill="#333" rx="2"/>
+                      <rect x="40" y="40" width="20" height="20" fill="#333" rx="2"/>
+                      <rect x="44" y="44" width="6" height="6" fill="white"/>
+                      <rect x="52" y="44" width="6" height="6" fill="white"/>
+                      <rect x="44" y="52" width="14" height="6" fill="white"/>
+                      {Array.from({length: 25}).map((_, i) => {
+                        const x = 8 + (i % 5) * 18;
+                        const y = 8 + Math.floor(i / 5) * 18;
+                        const isCorner = (i === 0 || i === 4 || i === 20 || i === 24);
+                        const isCenter = i === 12;
+                        if (isCorner || isCenter) return null;
+                        return <rect key={i} x={x} y={y} width="6" height="6" fill="#333" opacity={Math.random() > 0.5 ? 1 : 0}/>;
+                      })}
+                      <text x="50" y="92" textAnchor="middle" fontSize="6" fill="#666">Scan</text>
+                    </svg>
                   </div>
                   <p className="text-xs text-slate-500">{lang === 'zh' ? '微信扫码添加客服' : 'WeChat QR Code'}</p>
                 </div>
