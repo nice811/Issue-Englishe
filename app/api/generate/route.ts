@@ -262,64 +262,71 @@ function buildDeveloperPrompt(spelling: 'us' | 'uk', watermark: boolean): string
     ? 'colour, organise, centre, behaviour, honour, favourite'
     : 'color, organize, center, behavior, honor, favorite'
 
-  return `FORMAT REQUIREMENTS (STRICT):
-
-1. TITLE (MUST be first line, max 80 characters)
-   - Include affected module or area
-   - Format: "Area: Brief description of the issue"
-   - Example: "Auth: Login fails with valid credentials"
-   - CRITICAL: Title must be plain text on the FIRST line, then a blank line before Description
-
-2. STRUCTURE (mandatory sections in order):
-   Summary
-   Steps to Reproduce
-   Expected Behavior
-   Actual Behavior
-   Environment
-   Additional Context (optional, omit if empty)
-   Labels (suggested)
-
-3. SUMMARY
-   - Brief, factual description of the issue
-   - No speculation or solutions
-   - Max 2-3 sentences
-   - Separate from Title with a blank line
-
-4. STEPS TO REPRODUCE
-   - Use numbered list (1., 2., 3.)
-   - If user didn't provide: output "Provide a minimal repro."
-   - Never leave numbered steps empty
-   - End this section with: "Repro frequency: Unknown (please confirm)"
-
-5. SPELLING
-   - Use ${spelling === 'uk' ? 'British' : 'American'} English consistently
-   - Key variants: ${spellingVariant}
-   - Keep technical terms in original form
-
-6. SENSITIVE DATA HANDLING
-   - API keys/tokens: "api_key: [REDACTED]"
-   - Passwords: "password: [REDACTED]"
-   - Emails: "[REDACTED]"
-   - IPs: "[REDACTED]"
-   - If logs exceed 2000 chars: truncate and add "[TRUNCATED]"
-
-7. CODE BLOCKS
-   - Use triple backticks with language hint (bash, json, etc.)
-   - Always close code blocks properly
-
-8. LIST CONTINUITY
-   - Numbered lists must be sequential (1., 2., 3.)
-   - Bullet lists use hyphen (-)
-
-9. WATERMARK (do NOT add watermark in output)
-   - Never add watermark in your response; the server will append it automatically
-
-10. UNKNOWN INFORMATION
-    - Never leave truly empty; use explicit placeholders
-    - Examples:
-      - "Repro frequency: Unknown (please confirm)"
-      - "OS: Unknown — please confirm."
-      - "Error message: Not provided"`
+  return 'FORMAT REQUIREMENTS (STRICT):\n' +
+    '\n' +
+    '1. TITLE (MUST be first line, max 80 characters)\n' +
+    '   - Include affected module or area\n' +
+    '   - Format: "Area: Brief description of the issue"\n' +
+    '   - Example: "Auth: Login fails with valid credentials"\n' +
+    '   - CRITICAL: Title must be plain text on the FIRST line\n' +
+    '\n' +
+    '2. STRUCTURE (mandatory sections in order):\n' +
+    '   Summary\n' +
+    '   Steps to Reproduce\n' +
+    '   Expected Behavior\n' +
+    '   Actual Behavior\n' +
+    '   Environment\n' +
+    '   Additional Context (optional)\n' +
+    '   Labels (suggested)\n' +
+    '\n' +
+    '3. SUMMARY\n' +
+    '   - Brief, factual description of the issue\n' +
+    '   - No speculation or solutions\n' +
+    '   - Max 2-3 sentences\n' +
+    '\n' +
+    '4. STEPS TO REPRODUCE\n' +
+    '   - Use numbered list (1., 2., 3.)\n' +
+    '   - If user did not provide: output "Provide a minimal repro."\n' +
+    '   - Never leave numbered steps empty\n' +
+    '\n' +
+    '5. REPRO FREQUENCY (required, separate line after Steps)\n' +
+    '   - Format: "Repro frequency: always | often | rarely | unknown"\n' +
+    '   - Example: "Repro frequency: always"\n' +
+    '\n' +
+    '6. SPELLING\n' +
+    '   - Use ' + (spelling === 'uk' ? 'British' : 'American') + ' English consistently\n' +
+    '   - Key variants: ' + spellingVariant + '\n' +
+    '   - Keep technical terms in original form\n' +
+    '\n' +
+    '7. SENSITIVE DATA HANDLING\n' +
+    '   - API keys/tokens: "api_key: [REDACTED]"\n' +
+    '   - Passwords: "password: [REDACTED]"\n' +
+    '   - Emails: "[REDACTED]"\n' +
+    '   - IPs: "[REDACTED]"\n' +
+    '   - If logs exceed 2000 chars: truncate and add "[TRUNCATED]"\n' +
+    '\n' +
+    '8. CODE BLOCKS\n' +
+    '   - Use triple backticks with language hint (bash, json, etc.)\n' +
+    '   - Always close code blocks properly\n' +
+    '\n' +
+    '9. LIST CONTINUITY\n' +
+    '   - Numbered lists must be sequential (1., 2., 3.)\n' +
+    '   - Bullet lists use hyphen (-)\n' +
+    '\n' +
+    '10. WATERMARK (do NOT add watermark in output)\n' +
+    '   - Never add watermark in your response; the server will append it\n' +
+    '\n' +
+    '11. LABELS (minimal, no duplicates)\n' +
+    '    - Use only 2-4 most relevant labels\n' +
+    '    - Common formats: bug, area/<module>, priority/<level>, needs-triage\n' +
+    '    - Avoid redundant labels\n' +
+    '\n' +
+    '12. UNKNOWN INFORMATION\n' +
+    '    - Never leave truly empty; use explicit placeholders\n' +
+    '    - Examples:\n' +
+    '      - "Repro frequency: unknown"\n' +
+    '      - "OS: Unknown - please confirm."\n' +
+    '      - "Error message: Not provided"\n'
 }
 
 // 第三层：User Prompt（业务数据注入）
@@ -352,7 +359,7 @@ function buildUserPrompt(input: GenerateRequest): string {
     }
   }
 
-  return `ISSUE DATA:\n\n${JSON.stringify(compacted, null, 2)}\n\nGenerate a GitHub Issue following the system and developer instructions.`
+  return `ISSUE DATA:\n\n${JSON.stringify(compacted, null, 2)}\n\nGenerate a GitHub Issue following the system and developer instructions.`;
 }
 
 // Few-shot 示例
@@ -363,100 +370,131 @@ FEW-SHOT EXAMPLES:
 Input: Title: 按钮点击无效, Description: 在提交表单时，确认按钮点击后没有任何反应，也无法取消, Steps: ["打开页面", "填写表单", "点击确认按钮"], Expected: 点击后应该显示加载状态，然后跳转结果页, Actual: 没有任何反应，页面看起来像冻结了一样, Env: {"os": "macOS 14", "appVersion": "2.1.0", "deps": ["react 18.2.0"]}
 
 Output:
-## Description
+Auth: Login button unresponsive after clicking
 
-Form submission button becomes unresponsive after clicking. Users cannot confirm or cancel the action.
+Summary
 
-## Steps to Reproduce
+Login button becomes unresponsive after clicking. Users cannot submit the form or cancel the action.
 
-1. Open the page
+Steps to Reproduce
+
+1. Open the login page
 2. Fill out the form
 3. Click the confirmation button
 
-Reproduction frequency: Unknown (please confirm)
+Repro frequency: unknown
 
-## Expected Behavior
+Expected Behavior
 
 Click should trigger loading state, then redirect to result page.
 
-## Actual Behavior
+Actual Behavior
 
 No response. Page appears frozen; no visual feedback or navigation occurs.
 
-## Environment
+Environment
 
 - OS: macOS 14
 - App Version: 2.1.0
 - Dependencies: react 18.2.0
 
-## Suggested Labels
+Labels
 
 - bug
-- frontend
-- ui
+- area/frontend
+- needs-triage
 
---- EXAMPLE 2: Backend Error (with sensitive data) ---
+--- EXAMPLE 2: Backend Error ---
 Input: Title: API 请求返回 500 错误, Description: 部署到生产环境后调用 /api/users 接口一直返回 500，内网测试环境正常, Steps: ["curl -X POST https://api.example.com/users", "-H Authorization: Bearer [TOKEN]", "返回 500"], Expected: 返回 200 和用户列表 JSON, Actual: HTTP 500 Internal Server Error, Env: {"os": "Ubuntu 22.04", "appVersion": "3.0.1", "deps": ["node 18.17.0", "express 4.18.2"], "logs": "Error: Cannot read property name of undefined at /app/routes/users.js:45:20"}
 
 Output:
-## Description
+API: /users endpoint returns HTTP 500
+
+Summary
 
 Production API endpoint /api/users returns HTTP 500 error. Same request works correctly in staging environment.
 
-## Steps to Reproduce
+Steps to Reproduce
 
 1. Send POST request to https://api.example.com/users
 2. Include Authorization header with Bearer token
 3. Observe HTTP 500 response
 
-Reproduction frequency: Always
+Repro frequency: always
 
-## Expected Behavior
+Expected Behavior
 
 Returns HTTP 200 with user list JSON.
 
-## Actual Behavior
+Actual Behavior
 
 HTTP 500 Internal Server Error.
 
-## Environment
+Environment
 
 - OS: Ubuntu 22.04
 - App Version: 3.0.1
 - Dependencies: node 18.17.0, express 4.18.2
 
-## Additional Context
+Additional Context
 
 Error log:
 Error: Cannot read property name of undefined
     at /app/routes/users.js:45:20
 
-## Suggested Labels
+Labels
 
 - bug
-- backend
-- api
-- production
+- area/api
+- priority/high
 `
 
-// ============ 标签建议（文本启发式） ============
+// ============ 标签建议（精简版，避免重复） ============
 function suggestLabels(description: string, title: string): string[] {
   const text = (description + ' ' + title).toLowerCase()
   const labels: string[] = []
 
-  if (/error|crash|fail|bug|exception|panic/.test(text)) labels.push('bug')
-  if (/feature|request|enhancement|proposal/.test(text)) labels.push('enhancement')
-  if (/doc|document|readme|docs/.test(text)) labels.push('documentation')
-  if (/perf|slow|performance|speed|latency/.test(text)) labels.push('performance')
-  if (/build|compile|install|deploy|bundle/.test(text)) labels.push('build')
-  if (/\bci[^a-z]|github actions|pipeline|workflow/.test(text)) labels.push('ci')
-  if (/security|auth|permission|vulnerability|cve/.test(text)) labels.push('security')
-  if (/mobile|ios|android|iphone|ipad/.test(text)) labels.push('mobile')
-  if (/\bapi\b|endpoint|rest|graphql/.test(text)) labels.push('api')
-  if (/frontend|front-end|ui\b|css|react|vue|svelte/.test(text)) labels.push('frontend')
-  if (/backend|back-end|server|database|postgres|mysql/.test(text)) labels.push('backend')
+  // 核心问题类型（只取一个）
+  if (/error|crash|fail|exception|panic/.test(text)) {
+    labels.push('bug')
+  } else if (/feature|request|enhancement|proposal/.test(text)) {
+    labels.push('enhancement')
+  } else if (/doc|document|readme|docs/.test(text)) {
+    labels.push('documentation')
+  } else if (/perf|slow|performance|speed|latency/.test(text)) {
+    labels.push('performance')
+  } else if (/build|compile|install|deploy|bundle/.test(text)) {
+    labels.push('build')
+  } else if (/security|auth|permission|vulnerability|cve/.test(text)) {
+    labels.push('security')
+  } else {
+    labels.push('bug') // 默认
+  }
 
-  return labels.length > 0 ? labels : ['bug']
+  // 模块/区域（最多一个）
+  if (/\bapi\b|endpoint|rest|graphql/.test(text)) {
+    labels.push('area/api')
+  } else if (/frontend|front-end|ui\b|css|react|vue|svelte/.test(text)) {
+    labels.push('area/frontend')
+  } else if (/backend|back-end|server|database|postgres|mysql/.test(text)) {
+    labels.push('area/backend')
+  } else if (/mobile|ios|android|iphone|ipad/.test(text)) {
+    labels.push('area/mobile')
+  } else if (/auth|login|logout|credential/.test(text)) {
+    labels.push('area/auth')
+  }
+
+  // 优先级标记（可选）
+  if (/critical|urgent|production down/.test(text)) {
+    labels.push('priority/high')
+  } else if (/minor|cosmetic|typo/.test(text)) {
+    labels.push('priority/low')
+  } else {
+    labels.push('needs-triage')
+  }
+
+  // 限制最多 4 个标签
+  return labels.slice(0, 4)
 }
 
 // ============ API 路由 ============
