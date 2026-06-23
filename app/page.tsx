@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useCallback, useMemo, useEffect } from 'react'
-import { Script } from 'next/script'
 import DOMPurify from 'dompurify'
 import Markdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -691,7 +690,7 @@ export default function Home() {
             </div>
           )}
 
-          <Script
+          <script
             id="ldjson"
             type="application/ld+json"
             dangerouslySetInnerHTML={{
