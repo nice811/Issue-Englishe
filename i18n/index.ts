@@ -4,7 +4,7 @@ export type Language = 'zh' | 'en'
 
 export function getText(lang: Language, path: string): string {
   const keys = path.split('.')
-  let result: any = translations
+  let result: any = translations[lang] || translations.zh
   
   for (const key of keys) {
     if (result && typeof result === 'object' && key in result) {
