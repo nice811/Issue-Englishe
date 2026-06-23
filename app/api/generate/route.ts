@@ -290,7 +290,8 @@ function buildDeveloperPrompt(spelling: 'us' | 'uk', watermark: boolean): string
     '   - Never leave numbered steps empty\n' +
     '\n' +
     '5. REPRO FREQUENCY (required, separate line after Steps)\n' +
-    '   - Format: "Repro frequency: always | often | rarely | unknown"\n' +
+    '   - Format: "Repro frequency: always | often | rarely | unknown (please confirm)"\n' +
+    '   - When frequency is unknown: use "Repro frequency: unknown (please confirm)"\n' +
     '   - Example: "Repro frequency: always"\n' +
     '\n' +
     '6. SPELLING\n' +
@@ -382,7 +383,7 @@ Steps to Reproduce
 2. Fill out the form
 3. Click the confirmation button
 
-Repro frequency: unknown
+Repro frequency: unknown (please confirm)
 
 Expected Behavior
 
