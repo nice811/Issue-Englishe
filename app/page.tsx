@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback, useMemo, useEffect } from 'react'
+import { Script } from 'next/script'
 import DOMPurify from 'dompurify'
 import Markdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -619,76 +620,104 @@ export default function Home() {
 
       {/* Upgrade Modal */}
       {showUpgradeModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowUpgradeModal(false)}>
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden" onClick={(e) => e.stopPropagation()}>
-            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-5">
-              <h3 className="text-xl font-bold text-white">{t('common.upgrade')}</h3>
-              <p className="text-indigo-100 text-sm mt-1">Unlock Pro features</p>
-            </div>
-            <div className="p-6 space-y-4">
-              <div className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-emerald-600">
-                      <path d="M5 12l5 5L20 7" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="font-medium text-slate-800">无水印输出</p>
-                    <p className="text-sm text-slate-500">生成的 Issue 不再包含水印</p>
-                  </div>
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowUpgradeModal(false)}>
+              <div className="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-5">
+                  <h3 className="text-xl font-bold text-white">{t('common.upgrade')}</h3>
+                  <p className="text-indigo-100 text-sm mt-1">Unlock Pro features</p>
                 </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-emerald-600">
-                      <path d="M5 12l5 5L20 7" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+                <div className="p-6 space-y-4">
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-emerald-600">
+                          <path d="M5 12l5 5L20 7" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="font-medium text-slate-800">无水印输出</p>
+                        <p className="text-sm text-slate-500">生成的 Issue 不再包含水印</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-emerald-600">
+                          <path d="M5 12l5 5L20 7" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="font-medium text-slate-800">200 次/天额度</p>
+                        <p className="text-sm text-slate-500">比免费版多 20 倍的使用次数</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-emerald-600">
+                          <path d="M5 12l5 5L20 7" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="font-medium text-slate-800">英式拼写支持</p>
+                        <p className="text-sm text-slate-500">支持 colour/organise 等英式拼写</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-emerald-600">
+                          <path d="M5 12l5 5L20 7" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="font-medium text-slate-800">优先技术支持</p>
+                        <p className="text-sm text-slate-500">更快响应和专属支持渠道</p>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium text-slate-800">200 次/天额度</p>
-                    <p className="text-sm text-slate-500">比免费版多 20 倍的使用次数</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-emerald-600">
-                      <path d="M5 12l5 5L20 7" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="font-medium text-slate-800">英式拼写支持</p>
-                    <p className="text-sm text-slate-500">支持 colour/organise 等英式拼写</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-emerald-600">
-                      <path d="M5 12l5 5L20 7" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="font-medium text-slate-800">优先技术支持</p>
-                    <p className="text-sm text-slate-500">更快响应和专属支持渠道</p>
+                  <div className="pt-4 border-t border-slate-100">
+                    <div className="text-center">
+                      <p className="text-sm text-slate-600 mb-3">{lang === 'zh' ? '扫码添加客服开通 Pro' : 'Scan to upgrade to Pro'}</p>
+                      <div className="w-32 h-32 mx-auto bg-white rounded-lg border border-slate-200 flex items-center justify-center mb-3 overflow-hidden">
+                        <img 
+                          src="https://img.cdn1.vip/i/6a3a03270b161_1782186791.webp" 
+                          alt="WeChat QR Code" 
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <p className="text-xs text-slate-500">{lang === 'zh' ? '微信扫码添加客服' : 'WeChat QR Code'}</p>
+                    </div>
                   </div>
                 </div>
               </div>
-              <div className="pt-4 border-t border-slate-100">
-                <div className="text-center">
-                  <p className="text-sm text-slate-600 mb-3">{lang === 'zh' ? '扫码添加客服开通 Pro' : 'Scan to upgrade to Pro'}</p>
-                  <div className="w-32 h-32 mx-auto bg-white rounded-lg border border-slate-200 flex items-center justify-center mb-3 overflow-hidden">
-                    <img 
-                      src="https://img.cdn1.vip/i/6a3a03270b161_1782186791.webp" 
-                      alt="WeChat QR Code" 
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <p className="text-xs text-slate-500">{lang === 'zh' ? '微信扫码添加客服' : 'WeChat QR Code'}</p>
-                </div>
-              </div>
             </div>
-          </div>
+          )}
+
+          <Script
+            id="ldjson"
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "WebApplication",
+                "name": "Issue Englisher",
+                "description": "Translate Chinese/mixed language bug reports to standard English GitHub Issues",
+                "url": "https://issue-englisher.vercel.app",
+                "applicationCategory": "DeveloperApplication",
+                "featureList": [
+                  "Translate Chinese bug reports to English",
+                  "Professional GitHub Issue formatting",
+                  "Sensitive data redaction",
+                  "Watermark control",
+                  "Usage limits management"
+                ],
+                "offers": {
+                  "@type": "Offer",
+                  "name": "Free Tier",
+                  "price": "0",
+                  "priceCurrency": "USD"
+                }
+              })
+            }}
+          />
         </div>
-      )}
-    </div>
-  )
-}
+      )
+    }
