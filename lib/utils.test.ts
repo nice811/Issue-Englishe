@@ -48,7 +48,7 @@ describe('validateInput', () => {
   it('should pass validation with valid input', () => {
     const input = {
       title: 'Test Issue',
-      description: 'This is a detailed description with more than 30 characters.',
+      description: 'This is a detailed description with more than 15 characters.',
       expected: 'Expected behavior is clear',
       actual: 'Actual behavior is different'
     }
@@ -60,7 +60,7 @@ describe('validateInput', () => {
   it('should fail when title is too short', () => {
     const input = {
       title: '',
-      description: 'This is a detailed description with more than 30 characters.',
+      description: 'This is a detailed description with more than 15 characters.',
       expected: 'Expected behavior is clear',
       actual: 'Actual behavior is different'
     }
@@ -72,7 +72,7 @@ describe('validateInput', () => {
   it('should fail when title is too long', () => {
     const input = {
       title: 'x'.repeat(121),
-      description: 'This is a detailed description with more than 30 characters.',
+      description: 'This is a detailed description with more than 15 characters.',
       expected: 'Expected behavior is clear',
       actual: 'Actual behavior is different'
     }
@@ -90,13 +90,13 @@ describe('validateInput', () => {
     }
     const result = validateInput(input)
     expect(result.valid).toBe(false)
-    expect(result.errors).toContain('Description must be at least 30 characters')
+    expect(result.errors).toContain('Description must be at least 15 characters')
   })
 
   it('should fail when expected behavior is too short', () => {
     const input = {
       title: 'Test Issue',
-      description: 'This is a detailed description with more than 30 characters.',
+      description: 'This is a detailed description with more than 15 characters.',
       expected: 'Short',
       actual: 'Actual behavior is different'
     }
@@ -108,7 +108,7 @@ describe('validateInput', () => {
   it('should fail when actual behavior is too short', () => {
     const input = {
       title: 'Test Issue',
-      description: 'This is a detailed description with more than 30 characters.',
+      description: 'This is a detailed description with more than 15 characters.',
       expected: 'Expected behavior is clear',
       actual: 'Short'
     }

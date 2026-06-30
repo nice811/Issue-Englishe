@@ -41,8 +41,8 @@ export function validateInput(input: {
     errors.push('Title must be between 1-120 characters');
   }
   
-  if (!input.description || input.description.length < 30) {
-    errors.push('Description must be at least 30 characters');
+  if (!input.description || input.description.length < 15) {
+    errors.push('Description must be at least 15 characters');
   }
   
   if (!input.expected || input.expected.length < 10) {
