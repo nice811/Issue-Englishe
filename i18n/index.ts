@@ -2,7 +2,7 @@ import translations from './zh-en.json'
 
 export type Language = 'zh' | 'en'
 
-export function getText(lang: Language, path: string): string {
+export function getText(lang: Language, path: string, params?: Record<string, string | number>): string {
   const keys = path.split('.')
   let result: any = translations[lang] || translations.zh
   
@@ -14,7 +14,15 @@ export function getText(lang: Language, path: string): string {
     }
   }
   
-  return typeof result === 'string' ? result : path
+  let text = typeof result === 'string' ? result : path
+  
+  if (params) {
+    for (const [key, value] of Object.entries(params)) {
+      text = text.replace(new RegExp(`\\{${key}\\}`, 'g'), String(value))
+    }
+  }
+  
+  return text
 }
 
 export function getBrowserLanguage(): Language {

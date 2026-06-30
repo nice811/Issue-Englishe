@@ -16,7 +16,9 @@
       "loading": "生成中...",
       "copied": "已复制！",
       "required": "必填",
-      "optional": "可选"
+      "optional": "可选",
+      "expandDesc": "智能扩充 · Pro",
+      "expanding": "扩充中..."
     },
     "form": {
       "title": "标题",
@@ -50,7 +52,11 @@
     "preview": {
       "title": "Issue 预览",
       "emptyState": "填写表单并点击「生成」",
-      "suggestedLabels": "建议标签"
+      "suggestedLabels": "建议标签",
+      "descTooShort": "⚠️ 描述偏短（{count}/50字符），GitHub Issue 容易被驳回",
+      "expandProTip": "Pro 版：一键智能扩充，自动补充原因、影响、上下文",
+      "expandFreeTip": "免费版：请手动补充细节后重新生成",
+      "expandSuccess": "✅ 已智能扩充描述"
     },
     "footer": {
       "copyright": "© 2026 Issue Englisher. All rights reserved.",
@@ -83,7 +89,9 @@
       "loading": "Generating...",
       "copied": "Copied!",
       "required": "Required",
-      "optional": "Optional"
+      "optional": "Optional",
+      "expandDesc": "Expand · Pro",
+      "expanding": "Expanding..."
     },
     "form": {
       "title": "Title",
@@ -117,7 +125,11 @@
     "preview": {
       "title": "Issue Preview",
       "emptyState": "Fill in the form and click Generate",
-      "suggestedLabels": "Suggested Labels"
+      "suggestedLabels": "Suggested Labels",
+      "descTooShort": "⚠️ Description is short ({count}/50 chars), may get rejected on GitHub",
+      "expandProTip": "Pro: Auto-expand with causes, impact, and context",
+      "expandFreeTip": "Free tier: please add details and regenerate",
+      "expandSuccess": "✅ Description expanded successfully"
     },
     "footer": {
       "copyright": "© 2026 Issue Englisher. All rights reserved.",

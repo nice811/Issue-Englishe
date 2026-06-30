@@ -88,6 +88,8 @@ export default function Home() {
   const [usage, setUsage] = useState<{ countToday: number; limit: number } | null>(null)
   const [watermark, setWatermark] = useState<boolean | null>(null) // read-only from server
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [expanding, setExpanding] = useState(false)
+  const [expandSuccess, setExpandSuccess] = useState(false)
 
   // 初始化语言
   useEffect(() => {
@@ -95,7 +97,7 @@ export default function Home() {
   }, [])
 
   // 翻译函数
-  const t = useCallback((key: string) => getText(lang, key), [lang])
+  const t = useCallback((key: string, params?: Record<string, string | number>) => getText(lang, key, params), [lang])
 
   // ============ 更新函数 ============
   const updateField = useCallback(<K extends keyof FormState>(key: K, value: FormState[K]) => {
@@ -204,6 +206,48 @@ export default function Home() {
     }
   }, [form])
 
+  // ============ 智能扩充 ============
+  const expandDescription = useCallback(async () => {
+    if (!form.description || form.description.length < 10) return
+
+    setExpanding(true)
+    setError('')
+    setExpandSuccess(false)
+
+    try {
+      const resp = await fetch('/api/expand', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          description: form.description,
+          title: form.title,
+          token: form.token,
+          spelling: form.options.spelling
+        })
+      })
+
+      const data = await resp.json()
+
+      if (!resp.ok) {
+        if (resp.status === 402) {
+          setShowUpgradeModal(true)
+          throw new Error(data.message || 'Pro feature required.')
+        }
+        throw new Error(data.message || 'Expand failed.')
+      }
+
+      if (data.expanded) {
+        updateField('description', data.expanded)
+        setExpandSuccess(true)
+        setTimeout(() => setExpandSuccess(false), 3000)
+      }
+    } catch (err) {
+      setError((err as Error).message)
+    } finally {
+      setExpanding(false)
+    }
+  }, [form, updateField])
+
   // ============ 复制 & 下载 ============
   const copyToClipboard = useCallback(async () => {
     if (!markdown) return
@@ -241,6 +285,7 @@ export default function Home() {
   // ============ 派生显示数据 ============
   const remaining = usage ? usage.limit - usage.countToday : null
   const isProUser = useMemo(() => form.token.trim().length > 0, [form.token])
+  const descTooShort = form.description.length > 0 && form.description.length < 50
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900" onKeyDown={onKeyDown}>
@@ -318,15 +363,65 @@ export default function Home() {
 
               {/* Description */}
               <div>
-                <label className="block text-sm font-medium mb-1.5">{t('form.description')} <span className="text-red-500">*</span></label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-sm font-medium">{t('form.description')} <span className="text-red-500">*</span></label>
+                  <button
+                    type="button"
+                    onClick={expandDescription}
+                    disabled={expanding || form.description.length < 10}
+                    className={`text-xs font-medium flex items-center gap-1 transition ${
+                      isProUser
+                        ? 'text-indigo-600 hover:text-indigo-700 disabled:text-slate-400 disabled:cursor-not-allowed'
+                        : 'text-slate-500 hover:text-indigo-600 disabled:text-slate-400 disabled:cursor-not-allowed'
+                    }`}
+                    title={isProUser ? t('common.expandDesc') : t('preview.expandFreeTip')}
+                  >
+                    {expanding ? (
+                      <>
+                        <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <circle cx="12" cy="12" r="10" className="opacity-25" />
+                          <path d="M4 12a8 8 0 018-8" strokeLinecap="round" />
+                        </svg>
+                        {t('common.expanding')}
+                      </>
+                    ) : (
+                      <>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M12 5v14M5 12h14" strokeLinecap="round" />
+                        </svg>
+                        {t('common.expandDesc')}
+                      </>
+                    )}
+                  </button>
+                </div>
                 <textarea
                   value={form.description}
                   onChange={(e) => updateField('description', e.target.value)}
                   placeholder={t('form.descriptionPlaceholder')}
                   rows={4}
-                  className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
+                  className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none transition ${
+                    descTooShort ? 'border-amber-400 focus:ring-amber-500' : 'border-slate-300'
+                  }`}
                 />
-                <p className="text-xs text-slate-400 mt-1 text-right">{form.description.length} chars</p>
+                <div className="mt-1 space-y-1">
+                  {descTooShort && (
+                    <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2.5 py-1.5">
+                      {t('preview.descTooShort', { count: form.description.length })}
+                    </div>
+                  )}
+                  {expandSuccess && (
+                    <div className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md px-2.5 py-1.5">
+                      {t('preview.expandSuccess')}
+                    </div>
+                  )}
+                  {descTooShort && !isProUser && (
+                    <p className="text-xs text-slate-500">{t('preview.expandFreeTip')}</p>
+                  )}
+                  {descTooShort && isProUser && (
+                    <p className="text-xs text-indigo-600">{t('preview.expandProTip')}</p>
+                  )}
+                  <p className="text-xs text-slate-400 text-right">{form.description.length} chars</p>
+                </div>
               </div>
 
               {/* Steps */}
