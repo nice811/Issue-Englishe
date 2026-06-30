@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
+import { isValidPaidToken, getTokenQuota, verifyToken } from '../../../lib/token'
 
 // ============ 类型定义 ============
 interface EnvData {
@@ -177,30 +178,17 @@ interface WatermarkCtx {
   env: { [key: string]: string | undefined }
 }
 
-function isValidPaidToken(token: string): boolean {
-  // MVP: accept non-empty tokens that start with "ie_" or pass a simple length check.
-  // Production: verify against your billing database / JWT signature / license list.
-  if (!token || token.trim().length === 0) return false
-  const trimmed = token.trim()
-  if (trimmed.startsWith('ie_') && trimmed.length >= 16) return true
-  if (trimmed.length >= 32 && /^[A-Za-z0-9_\-]+$/.test(trimmed)) return true
-  return false
-}
-
 /**
  * determineWatermark — authoritative server-side only.
  * The client is NOT allowed to toggle the watermark on/off.
  */
 function determineWatermark(ctx: WatermarkCtx): boolean {
-  // Rule 1 — global disable via environment variable
   if (String(ctx.env.FORCE_WATERMARK || '').toLowerCase() === 'off') {
     return false
   }
-  // Rule 2 — paid user (valid token) removes watermark
   if (ctx.token && isValidPaidToken(ctx.token)) {
     return false
   }
-  // Rule 3 — default on (free tier)
   return true
 }
 
@@ -532,7 +520,8 @@ export async function POST(req: NextRequest) {
           { status: 401 }
         )
       }
-      currentLimit = TOKEN_DAILY_LIMIT
+      const quota = getTokenQuota(token)
+      currentLimit = quota.generate > 0 ? quota.generate : TOKEN_DAILY_LIMIT
       counterToCheck = tokenDailyCounter
       keyToCheck = token
     }

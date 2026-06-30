@@ -1,25 +1,88 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { isValidPaidToken, getTokenQuota, verifyToken } from '../../../lib/token'
 
 export const dynamic = 'force-dynamic'
 
-// ============ 水印判定 ============
-function isValidPaidToken(token?: string): boolean {
-  if (!token || token.trim().length === 0) return false
-  const trimmed = token.trim()
-  if (trimmed.startsWith('ie_') && trimmed.length >= 16) return true
-  if (trimmed.length >= 32 && /^[A-Za-z0-9_\-]+$/.test(trimmed)) return true
-  return false
+const FREE_DAILY_EXPAND_LIMIT = 1
+const PRO_DEFAULT_EXPAND_LIMIT = 50
+const DAY_MS = 24 * 60 * 60 * 1000
+
+interface CounterEntry {
+  count: number
+  resetAt: number
 }
 
-export async function POST(req: Request) {
+const freeExpandCounter = new Map<string, CounterEntry>()
+const tokenExpandCounter = new Map<string, CounterEntry>()
+
+function incrementAndCheck(
+  counter: Map<string, CounterEntry>,
+  key: string,
+  limit: number,
+  windowMs: number
+): { allowed: boolean; remaining: number; retryAfterMs: number; resetAt: number; count: number } {
+  const now = Date.now()
+  const entry = counter.get(key)
+
+  if (!entry || entry.resetAt <= now) {
+    counter.set(key, { count: 1, resetAt: now + windowMs })
+    return { allowed: true, remaining: limit - 1, retryAfterMs: 0, resetAt: now + windowMs, count: 1 }
+  }
+
+  if (entry.count >= limit) {
+    const retryMs = entry.resetAt - now
+    return { allowed: false, remaining: 0, retryAfterMs: retryMs, resetAt: entry.resetAt, count: entry.count }
+  }
+
+  entry.count += 1
+  counter.set(key, entry)
+  return { allowed: true, remaining: limit - entry.count, retryAfterMs: 0, resetAt: entry.resetAt, count: entry.count }
+}
+
+function getClientKey(req: NextRequest, body: any): { ip: string; fingerprint: string; token: string } {
+  const ip = (body.client?.ipHash && body.client.ipHash.length > 0)
+    ? body.client.ipHash
+    : (req.headers.get('x-forwarded-for') || '').split(',')[0].trim() ||
+      req.headers.get('x-real-ip') ||
+      'unknown'
+  const fingerprint = body.fingerprint || body.client?.fingerprint || 'no-fp'
+  const token = body.token || ''
+  return { ip, fingerprint, token }
+}
+
+export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { description, title, token, spelling = 'us' } = body
+    const { description, title, spelling = 'us' } = body
 
-    // 验证 Pro 权限
-    if (!isValidPaidToken(token)) {
+    const { ip, fingerprint, token } = getClientKey(req, body)
+
+    const isPro = token && isValidPaidToken(token)
+
+    let currentLimit = FREE_DAILY_EXPAND_LIMIT
+    let counterToCheck = freeExpandCounter
+    let keyToCheck = ip + '|' + fingerprint
+
+    if (isPro) {
+      const quota = getTokenQuota(token)
+      currentLimit = quota.expand === -1 ? PRO_DEFAULT_EXPAND_LIMIT : (quota.expand > 0 ? quota.expand : PRO_DEFAULT_EXPAND_LIMIT)
+      counterToCheck = tokenExpandCounter
+      keyToCheck = token
+    }
+
+    const dailyCheck = incrementAndCheck(counterToCheck, keyToCheck, currentLimit, DAY_MS)
+    if (!dailyCheck.allowed) {
       return NextResponse.json(
-        { error: 'PRO_REQUIRED', message: 'Smart expand is a Pro feature. Upgrade to unlock.' },
+        {
+          error: 'EXPAND_LIMIT_REACHED',
+          message: isPro
+            ? `Daily expand limit reached (${currentLimit}/day). Resets in ${Math.ceil(dailyCheck.retryAfterMs / 60000)} minutes.`
+            : `Free daily expand limit reached (${FREE_DAILY_EXPAND_LIMIT}/day). Upgrade to Pro for more.`,
+          isPro,
+          limit: currentLimit,
+          used: dailyCheck.count,
+          resetsInMinutes: Math.ceil(dailyCheck.retryAfterMs / 60000)
+        },
         { status: 402 }
       )
     }
@@ -102,6 +165,12 @@ Please expand this into a detailed description paragraph (80-120 words) suitable
       expanded,
       originalLength: description.length,
       expandedLength: expanded.length,
+      isPro,
+      usage: {
+        used: dailyCheck.count,
+        limit: currentLimit,
+        remaining: dailyCheck.remaining
+      },
       cost: {
         tokens,
         ms: costMs,

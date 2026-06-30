@@ -17,8 +17,11 @@
       "copied": "已复制！",
       "required": "必填",
       "optional": "可选",
-      "expandDesc": "智能扩充 · Pro",
-      "expanding": "扩充中..."
+      "expandDesc": "智能扩充",
+      "expandProBadge": "Pro",
+      "expandFreeBadge": "免费",
+      "expanding": "扩充中...",
+      "expandRemaining": "剩余 {count} 次/天"
     },
     "form": {
       "title": "标题",
@@ -90,8 +93,11 @@
       "copied": "Copied!",
       "required": "Required",
       "optional": "Optional",
-      "expandDesc": "Expand · Pro",
-      "expanding": "Expanding..."
+      "expandDesc": "Expand",
+      "expandProBadge": "Pro",
+      "expandFreeBadge": "Free",
+      "expanding": "Expanding...",
+      "expandRemaining": "{count} left today"
     },
     "form": {
       "title": "Title",
