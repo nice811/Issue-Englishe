@@ -607,12 +607,24 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="mt-12 border-t border-slate-200 bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-          <p>{t('footer.copyright')}</p>
-          <div className="flex items-center gap-4">
-            <span>{t('footer.freeProInfo')}</span>
-            <a href="#privacy" className="text-slate-500 hover:text-slate-700">{t('footer.privacy')}</a>
-            <a href="#terms" className="text-slate-500 hover:text-slate-700">{t('footer.terms')}</a>
+        <div className="mx-auto max-w-7xl px-4 py-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+            <div className="flex items-center gap-3">
+              <div className="h-6 w-6 rounded bg-gradient-to-br from-indigo-500 to-sky-500 flex items-center justify-center text-white font-bold text-[10px]">
+                IE
+              </div>
+              <div>
+                <p className="font-medium text-slate-700">{t('footer.copyright')}</p>
+                <p className="text-[11px] text-slate-400">{t('footer.tagline')}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <a href="#contact" className="text-slate-500 hover:text-indigo-600 transition-colors">{t('footer.contact')}</a>
+              <span className="text-slate-300">|</span>
+              <a href="#privacy" className="text-slate-500 hover:text-indigo-600 transition-colors">{t('footer.privacy')}</a>
+              <span className="text-slate-300">|</span>
+              <a href="#terms" className="text-slate-500 hover:text-indigo-600 transition-colors">{t('footer.terms')}</a>
+            </div>
           </div>
         </div>
       </footer>

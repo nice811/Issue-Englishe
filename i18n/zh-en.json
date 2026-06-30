@@ -53,10 +53,11 @@
       "suggestedLabels": "建议标签"
     },
     "footer": {
-      "copyright": "© 2026 Issue Englisher — 不存储输入",
-      "freeProInfo": "免费版 10/天 · Pro 200/天",
-      "privacy": "隐私",
-      "terms": "条款"
+      "copyright": "© 2026 Issue Englisher. All rights reserved.",
+      "tagline": "不存储您的输入数据",
+      "contact": "联系我们",
+      "privacy": "隐私政策",
+      "terms": "服务条款"
     },
     "errors": {
       "limitReached": "额度已达",
@@ -119,8 +120,9 @@
       "suggestedLabels": "Suggested Labels"
     },
     "footer": {
-      "copyright": "© 2026 Issue Englisher — we never store your input",
-      "freeProInfo": "Free: 10/day · Pro: 200/day",
+      "copyright": "© 2026 Issue Englisher. All rights reserved.",
+      "tagline": "We never store your input",
+      "contact": "Contact",
       "privacy": "Privacy",
       "terms": "Terms"
     },
