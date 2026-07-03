@@ -113,11 +113,12 @@ export default function Home() {
   const [expandSuccess, setExpandSuccess] = useState(false)
   const [expandUsage, setExpandUsage] = useState<{ used: number; limit: number; remaining: number } | null>(null)
   const [tokenValidation, setTokenValidation] = useState<{ valid: boolean; isPro: boolean } | null>(null)
-  const [deviceFingerprint] = useState<string>(() => generateDeviceFingerprint())
+  const [deviceFingerprint, setDeviceFingerprint] = useState<string>('')
 
-  // 初始化语言
+  // 初始化语言和设备指纹（仅客户端）
   useEffect(() => {
     setLang(getBrowserLanguage())
+    setDeviceFingerprint(generateDeviceFingerprint())
   }, [])
 
   const validateToken = useCallback(async (token: string, fp?: string) => {
