@@ -31,3 +31,7 @@ app/api/admin/
 
 # 令牌吊销黑名单（运行时生成，勿提交）
 .revoked-tokens.json
+
+# 测试覆盖率报告
+coverage/
+*.lcov
