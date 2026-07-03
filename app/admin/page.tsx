@@ -52,13 +52,14 @@ export default function AdminPage() {
     setLoading(true)
     setError('')
     try {
-      const resp = await fetch('/api/admin/verify-token', {
+      // 使用专门的登录端点，仅验证管理员密钥，不依赖令牌验证
+      const resp = await fetch('/api/admin/login', {
         method: 'POST',
-        headers: { 
+        headers: {
           'content-type': 'application/json',
           'x-admin-key': apiKey
         },
-        body: JSON.stringify({ token: 'test' })
+        body: JSON.stringify({})
       })
       if (resp.ok) {
         setAuthenticated(true)
