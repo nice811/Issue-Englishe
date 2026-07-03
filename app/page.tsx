@@ -65,6 +65,26 @@ function getDateSuffix(d: Date): string {
   return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}`
 }
 
+// 生成设备指纹：基于浏览器特征，不存储任何个人隐私信息
+function generateDeviceFingerprint(): string {
+  const components = [
+    navigator.userAgent,
+    navigator.language,
+    `${screen.width}x${screen.height}x${screen.colorDepth}`,
+    `${new Date().getTimezoneOffset()}`,
+    navigator.hardwareConcurrency?.toString() || 'unknown',
+    (navigator as any).deviceMemory?.toString() || 'unknown',
+  ]
+  const raw = components.join('|')
+  // 简单哈希（FNV-1a），不依赖 crypto API
+  let hash = 0x811c9dc5
+  for (let i = 0; i < raw.length; i++) {
+    hash ^= raw.charCodeAt(i)
+    hash = Math.imul(hash, 0x01000193)
+  }
+  return (hash >>> 0).toString(16).padStart(8, '0') + raw.length.toString(16)
+}
+
 function downloadBlob(filename: string, content: string, type = 'text/markdown'): void {
   const blob = new Blob([content], { type })
   const url = URL.createObjectURL(blob)
@@ -88,14 +108,42 @@ export default function Home() {
   const [usage, setUsage] = useState<{ countToday: number; limit: number } | null>(null)
   const [watermark, setWatermark] = useState<boolean | null>(null) // read-only from server
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [showExpandConfirm, setShowExpandConfirm] = useState(false)
   const [expanding, setExpanding] = useState(false)
   const [expandSuccess, setExpandSuccess] = useState(false)
   const [expandUsage, setExpandUsage] = useState<{ used: number; limit: number; remaining: number } | null>(null)
+  const [tokenValidation, setTokenValidation] = useState<{ valid: boolean; isPro: boolean } | null>(null)
+  const [deviceFingerprint] = useState<string>(() => generateDeviceFingerprint())
 
   // 初始化语言
   useEffect(() => {
     setLang(getBrowserLanguage())
   }, [])
+
+  const validateToken = useCallback(async (token: string, fp?: string) => {
+    if (!token.trim()) {
+      setTokenValidation(null)
+      return
+    }
+    try {
+      const resp = await fetch('/api/validate-token', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ token, fingerprint: fp })
+      })
+      const data = await resp.json()
+      setTokenValidation({ valid: data.valid, isPro: data.isPro })
+    } catch {
+      setTokenValidation({ valid: false, isPro: false })
+    }
+  }, [])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      validateToken(form.token, deviceFingerprint)
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [form.token, validateToken, deviceFingerprint])
 
   // 翻译函数
   const t = useCallback((key: string, params?: Record<string, string | number>) => getText(lang, key, params), [lang])
@@ -159,7 +207,7 @@ export default function Home() {
               .map(s => s.trim())
               .filter(Boolean)
           },
-          client: { ipHash: '', fingerprint: '' }
+          client: { ipHash: '', fingerprint: deviceFingerprint }
         })
       })
 
@@ -211,6 +259,11 @@ export default function Home() {
   const expandDescription = useCallback(async () => {
     if (!form.description || form.description.length < 10) return
 
+    if (form.token.trim().length === 0) {
+      setShowExpandConfirm(true)
+      return
+    }
+
     setExpanding(true)
     setError('')
     setExpandSuccess(false)
@@ -223,7 +276,8 @@ export default function Home() {
           description: form.description,
           title: form.title,
           token: form.token,
-          spelling: form.options.spelling
+          spelling: form.options.spelling,
+          fingerprint: deviceFingerprint
         })
       })
 
@@ -250,7 +304,51 @@ export default function Home() {
     } finally {
       setExpanding(false)
     }
-  }, [form, updateField])
+  }, [form, updateField, deviceFingerprint])
+
+  const confirmExpand = useCallback(async () => {
+    setShowExpandConfirm(false)
+    setExpanding(true)
+    setError('')
+    setExpandSuccess(false)
+
+    try {
+      const resp = await fetch('/api/expand', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          description: form.description,
+          title: form.title,
+          token: form.token,
+          spelling: form.options.spelling,
+          fingerprint: deviceFingerprint
+        })
+      })
+
+      const data = await resp.json()
+
+      if (!resp.ok) {
+        if (resp.status === 402) {
+          setShowUpgradeModal(true)
+          throw new Error(data.message || 'Pro feature required.')
+        }
+        throw new Error(data.message || 'Expand failed.')
+      }
+
+      if (data.expanded) {
+        updateField('description', data.expanded)
+        setExpandSuccess(true)
+        setTimeout(() => setExpandSuccess(false), 3000)
+      }
+      if (data.usage) {
+        setExpandUsage(data.usage)
+      }
+    } catch (err) {
+      setError((err as Error).message)
+    } finally {
+      setExpanding(false)
+    }
+  }, [form, updateField, deviceFingerprint])
 
   // ============ 复制 & 下载 ============
   const copyToClipboard = useCallback(async () => {
@@ -288,7 +386,7 @@ export default function Home() {
 
   // ============ 派生显示数据 ============
   const remaining = usage ? usage.limit - usage.countToday : null
-  const isProUser = useMemo(() => form.token.trim().length > 0, [form.token])
+  const isProUser = useMemo(() => tokenValidation?.isPro ?? false, [tokenValidation])
   const descTooShort = form.description.length > 0 && form.description.length < 50
 
   return (
@@ -814,6 +912,34 @@ export default function Home() {
               </div>
             </div>
           )}
+
+      {showExpandConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowExpandConfirm(false)}>
+          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="px-6 py-5 border-b border-slate-100">
+              <h3 className="text-lg font-bold text-slate-800">{t('preview.expandConfirmTitle')}</h3>
+            </div>
+            <div className="p-6">
+              <p className="text-sm text-slate-600 mb-6">{t('preview.expandConfirmDesc')}</p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowExpandConfirm(false)}
+                  className="flex-1 px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition"
+                >
+                  {t('preview.expandCancel')}
+                </button>
+                <button
+                  onClick={confirmExpand}
+                  disabled={expanding}
+                  className="flex-1 px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-400 disabled:cursor-not-allowed rounded-lg transition shadow-sm"
+                >
+                  {t('preview.expandConfirmBtn')}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
           <script
             id="ldjson"

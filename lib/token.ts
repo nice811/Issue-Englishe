@@ -15,6 +15,9 @@ interface TokenPayload {
     expand: number
   }
   meta?: Record<string, any>
+  // 设备绑定：生成令牌时若指定 deviceFingerprint，则写入此字段
+  // 验证时若 payload 含 devHash，则请求方必须提供相同设备指纹
+  devHash?: string
 }
 
 interface VerifyResult {
@@ -52,6 +55,7 @@ export function generateToken(opts: {
   generateQuota?: number
   expandQuota?: number
   meta?: Record<string, any>
+  deviceFingerprint?: string
 }): string {
   const now = Math.floor(Date.now() / 1000)
   const validDays = opts.validDays || 365
@@ -65,7 +69,8 @@ export function generateToken(opts: {
       generate: opts.generateQuota ?? 200,
       expand: opts.expandQuota ?? -1
     },
-    meta: opts.meta
+    meta: opts.meta,
+    devHash: opts.deviceFingerprint ? hashDevice(opts.deviceFingerprint) : undefined
   }
 
   const payloadStr = JSON.stringify(payload)
@@ -73,6 +78,11 @@ export function generateToken(opts: {
   const signature = sign(payloadB64)
 
   return `${TOKEN_PREFIX}${TOKEN_VERSION}_${payloadB64}.${signature}`
+}
+
+// 设备指纹哈希：存储哈希值而非明文，保护隐私
+function hashDevice(fp: string): string {
+  return crypto.createHash('sha256').update(fp).digest('hex').slice(0, 32)
 }
 
 export function verifyToken(token: string): VerifyResult {
@@ -121,15 +131,38 @@ export function isValidPaidToken(token: string): boolean {
   if (!token || token.trim().length === 0) return false
   const trimmed = token.trim()
 
-  const result = verifyToken(trimmed)
-  if (result.valid && result.payload) {
+  // 所有令牌必须通过签名验证，不再接受无签名的宽松格式
+  if (trimmed.startsWith('ie_v1_')) {
+    const result = verifyToken(trimmed)
+    if (!result.valid || !result.payload) return false
     return result.payload.plan === 'pro' || result.payload.plan === 'enterprise'
   }
 
-  if (trimmed.startsWith('ie_') && trimmed.length >= 16) return true
-  if (trimmed.length >= 32 && /^[A-Za-z0-9_\-]+$/.test(trimmed)) return true
-
   return false
+}
+
+/**
+ * 验证令牌并校验设备绑定。
+ * - 令牌不含 devHash：返回 valid=true，不校验设备（向后兼容，支持多设备）
+ * - 令牌含 devHash：请求方必须提供匹配的 deviceFingerprint，否则返回设备不匹配
+ */
+export function verifyTokenWithDevice(token: string, deviceFingerprint?: string): VerifyResult {
+  const result = verifyToken(token.trim())
+  if (!result.valid || !result.payload) return result
+
+  // 令牌未绑定设备：放行
+  if (!result.payload.devHash) return result
+
+  // 令牌已绑定设备：校验请求方设备指纹
+  if (!deviceFingerprint) {
+    return { valid: false, error: 'Device fingerprint required for this token' }
+  }
+  const requestDevHash = hashDevice(deviceFingerprint)
+  if (requestDevHash !== result.payload.devHash) {
+    return { valid: false, error: 'Device mismatch: token is bound to another device' }
+  }
+
+  return result
 }
 
 export function getTokenQuota(token: string): { generate: number; expand: number } {
@@ -144,10 +177,10 @@ export function getTokenQuota(token: string): { generate: number; expand: number
 }
 
 export function getTokenPlan(token: string): 'free' | 'pro' | 'enterprise' {
-  const result = verifyToken(token.trim())
+  const trimmed = token.trim()
+  const result = verifyToken(trimmed)
   if (result.valid && result.payload) {
     return result.payload.plan
   }
-  if (isValidPaidToken(token)) return 'pro'
   return 'free'
 }

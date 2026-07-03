@@ -23,3 +23,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# admin (local only - DO NOT COMMIT)
+app/admin/
+app/api/admin/
+令牌生成教程.md
+
+# 令牌吊销黑名单（运行时生成，勿提交）
+.revoked-tokens.json

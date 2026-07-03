@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { isValidPaidToken, getTokenQuota, verifyToken } from '../../../lib/token'
+import { isValidPaidToken, getTokenQuota, verifyToken, verifyTokenWithDevice } from '../../../lib/token'
+import { isTokenRevoked } from '../../../lib/revocation'
 
 export const dynamic = 'force-dynamic'
 
@@ -53,7 +54,7 @@ function getClientKey(req: NextRequest, body: any): { ip: string; fingerprint: s
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { description, title, spelling = 'us' } = body
+    const { description, title } = body
 
     const { ip, fingerprint, token } = getClientKey(req, body)
 
@@ -64,6 +65,29 @@ export async function POST(req: NextRequest) {
     let keyToCheck = ip + '|' + fingerprint
 
     if (isPro) {
+      // 吊销检查
+      if (isTokenRevoked(token)) {
+        return NextResponse.json(
+          {
+            error: 'TOKEN_REVOKED',
+            message: 'This token has been revoked. Please contact support.',
+            isPro: false
+          },
+          { status: 403 }
+        )
+      }
+      // 设备绑定校验
+      const deviceCheck = verifyTokenWithDevice(token, fingerprint)
+      if (!deviceCheck.valid) {
+        return NextResponse.json(
+          {
+            error: 'DEVICE_MISMATCH',
+            message: deviceCheck.error || 'This token is bound to another device.',
+            isPro: false
+          },
+          { status: 403 }
+        )
+      }
       const quota = getTokenQuota(token)
       currentLimit = quota.expand === -1 ? PRO_DEFAULT_EXPAND_LIMIT : (quota.expand > 0 ? quota.expand : PRO_DEFAULT_EXPAND_LIMIT)
       counterToCheck = tokenExpandCounter
@@ -102,23 +126,21 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const spellingWord = spelling === 'uk' ? 'British' : 'American'
+    const systemPrompt = `你是一位专业的 GitHub Issue 撰写专家。请将用户给出的简短描述扩充为一段详细、结构清晰的中文描述（80-150字）。
 
-    const systemPrompt = `You are an expert GitHub issue writer. Expand the given short description into a detailed, well-structured paragraph of 80-120 words.
+规则：
+- 只输出扩充后的中文描述段落，不要输出其他任何内容。
+- 保持客观事实，不要编造不存在的细节。
+- 补充合理的上下文：可能的影响范围、受影响的用户、触发条件、发生频率等。
+- 不要添加 markdown 标题或项目符号，只输出一段连贯的文字。
+- 不要编造具体的版本号、错误码或未提供的技术细节。
+- 使用"可能影响"、"似乎在...时发生"等措辞保持真实性。
+- 输出必须保持中文。`
 
-Rules:
-- Output ONLY the expanded description paragraph, nothing else.
-- Use ${spellingWord} English spelling.
-- Keep it factual and objective — no speculation.
-- Add implied context: likely impact, affected users, when it occurs.
-- Do NOT add markdown headers or bullet points. Just a single flowing paragraph.
-- Do NOT invent specific version numbers, error codes, or details not provided.
-- Use phrases like "appears to occur when", "seems to affect", "likely impacts" to stay truthful.`
+    const userPrompt = `标题：${title || '无标题'}
+简短描述：${description}
 
-    const userPrompt = `Title: ${title || 'Untitled'}
-Short description: ${description}
-
-Please expand this into a detailed description paragraph (80-120 words) suitable for a GitHub issue.`
+请将以上简短描述扩充为一段详细的中文描述（80-150字），适合作为 GitHub Issue 的描述部分。`
 
     const startTime = Date.now()
 

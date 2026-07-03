@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
-import { isValidPaidToken, getTokenQuota, verifyToken } from '../../../lib/token'
+import { isValidPaidToken, getTokenQuota, verifyToken, verifyTokenWithDevice } from '../../../lib/token'
+import { isTokenRevoked } from '../../../lib/revocation'
 
 // ============ 类型定义 ============
 interface EnvData {
@@ -518,6 +519,27 @@ export async function POST(req: NextRequest) {
             details: ['The provided access token is not recognized. Leave it empty for the free tier or contact support.']
           },
           { status: 401 }
+        )
+      }
+      // 吊销检查
+      if (isTokenRevoked(token)) {
+        return NextResponse.json(
+          {
+            error: 'TOKEN_REVOKED',
+            details: ['This token has been revoked. Please contact support.']
+          },
+          { status: 403 }
+        )
+      }
+      // 设备绑定校验
+      const deviceCheck = verifyTokenWithDevice(token, fingerprint)
+      if (!deviceCheck.valid) {
+        return NextResponse.json(
+          {
+            error: 'DEVICE_MISMATCH',
+            details: [deviceCheck.error || 'This token is bound to another device.']
+          },
+          { status: 403 }
         )
       }
       const quota = getTokenQuota(token)
