@@ -32,6 +32,7 @@ interface GenerateRequest {
   options?: OptionsData
   client?: ClientData
   token?: string
+  lang?: string
 }
 
 // ============ 限流配置 ============
@@ -121,23 +122,24 @@ function sanitizeSensitiveData(text: string): string {
 // ============ 输入校验 ============
 function validateInput(input: GenerateRequest): { valid: boolean; errors: string[] } {
   const errors: string[] = []
+  const isEnglish = input.lang === 'en'
 
   if (!input.title || input.title.length < 1) {
-    errors.push('标题不能为空（1-120字符）。')
+    errors.push(isEnglish ? 'Title cannot be empty (1-120 characters).' : '标题不能为空（1-120字符）。')
   } else if (input.title.length > 120) {
-    errors.push('标题不能超过120字符。')
+    errors.push(isEnglish ? 'Title cannot exceed 120 characters.' : '标题不能超过120字符。')
   }
 
   if (!input.description || input.description.length < 15) {
-    errors.push('问题描述至少需要15个字符。')
+    errors.push(isEnglish ? 'Description must be at least 15 characters.' : '问题描述至少需要15个字符。')
   }
 
   if (!input.expected || input.expected.length < 10) {
-    errors.push('期望行为至少需要10个字符。')
+    errors.push(isEnglish ? 'Expected behavior must be at least 10 characters.' : '期望行为至少需要10个字符。')
   }
 
   if (!input.actual || input.actual.length < 10) {
-    errors.push('实际行为至少需要10个字符。')
+    errors.push(isEnglish ? 'Actual behavior must be at least 10 characters.' : '实际行为至少需要10个字符。')
   }
 
   // Detect un-redacted sensitive data in title/description
@@ -151,7 +153,7 @@ function validateInput(input: GenerateRequest): { valid: boolean; errors: string
   const combinedCheck = (input.title || '') + ' ' + (input.description || '')
   for (const pattern of sensitivePatterns) {
     if (pattern.test(combinedCheck)) {
-      errors.push('检测到敏感数据。请在提交前脱敏 API 密钥、令牌、邮箱和 IP 地址。')
+      errors.push(isEnglish ? 'Sensitive data detected. Please redact API keys, tokens, emails, and IP addresses before submitting.' : '检测到敏感数据。请在提交前脱敏 API 密钥、令牌、邮箱和 IP 地址。')
       break
     }
   }
@@ -515,8 +517,8 @@ export async function POST(req: NextRequest) {
       if (!isValidPaidToken(token)) {
         return NextResponse.json(
           {
-            error: '令牌无效',
-            details: ['访问令牌无法识别。留空使用免费版，或联系支持获取帮助。']
+            error: isEnglish ? 'Invalid token' : '令牌无效',
+            details: [isEnglish ? 'Access token not recognized. Leave empty for free tier or contact support.' : '访问令牌无法识别。留空使用免费版，或联系支持获取帮助。']
           },
           { status: 401 }
         )
@@ -525,8 +527,8 @@ export async function POST(req: NextRequest) {
       if (await isTokenRevoked(token)) {
         return NextResponse.json(
           {
-            error: '令牌已吊销',
-            details: ['该令牌已被吊销，如有疑问请联系支持。']
+            error: isEnglish ? 'Token revoked' : '令牌已吊销',
+            details: [isEnglish ? 'This token has been revoked. Contact support for assistance.' : '该令牌已被吊销，如有疑问请联系支持。']
           },
           { status: 403 }
         )
@@ -534,17 +536,17 @@ export async function POST(req: NextRequest) {
       // 设备绑定校验
       const deviceCheck = verifyTokenWithDevice(token, fingerprint)
       if (!deviceCheck.valid) {
-        let deviceError = '该令牌已绑定到其他设备。'
+        let deviceError = isEnglish ? 'This token is bound to another device.' : '该令牌已绑定到其他设备。'
         if (deviceCheck.error === 'DEVICE_MISMATCH') {
-          deviceError = '该令牌已绑定到其他设备，只能在绑定设备上使用。'
+          deviceError = isEnglish ? 'This token is bound to another device and can only be used there.' : '该令牌已绑定到其他设备，只能在绑定设备上使用。'
         } else if (deviceCheck.error === 'EXPIRED') {
-          deviceError = '该令牌已过期。'
+          deviceError = isEnglish ? 'This token has expired.' : '该令牌已过期。'
         } else if (deviceCheck.error === 'NOT_YET_VALID') {
-          deviceError = '该令牌尚未生效。'
+          deviceError = isEnglish ? 'This token is not yet valid.' : '该令牌尚未生效。'
         }
         return NextResponse.json(
           {
-            error: '设备不匹配',
+            error: isEnglish ? 'Device mismatch' : '设备不匹配',
             details: [deviceError]
           },
           { status: 403 }
@@ -560,10 +562,10 @@ export async function POST(req: NextRequest) {
     if (!dailyCheck.allowed) {
       return NextResponse.json(
         {
-          error: '额度已达',
+          error: isEnglish ? 'Limit reached' : '额度已达',
           details: [
-            `已达到今日使用上限（${currentLimit} 次/天）。`,
-            `约 ${Math.ceil(dailyCheck.retryAfterMs / 60000)} 分钟后重置。`
+            isEnglish ? `Daily limit reached (${currentLimit} uses/day).` : `已达到今日使用上限（${currentLimit} 次/天）。`,
+            isEnglish ? `Resets in approximately ${Math.ceil(dailyCheck.retryAfterMs / 60000)} minutes.` : `约 ${Math.ceil(dailyCheck.retryAfterMs / 60000)} 分钟后重置。`
           ]
         },
         { status: 402 }
@@ -576,10 +578,10 @@ export async function POST(req: NextRequest) {
     if (!ipCheck.allowed) {
       return NextResponse.json(
         {
-          error: '请求过于频繁',
+          error: isEnglish ? 'Rate limited' : '请求过于频繁',
           details: [
-            `限流：该 IP + 设备指纹 30 分钟内最多 ${IP_WINDOW_LIMIT} 次请求。`,
-            `请 ${Math.ceil(ipCheck.retryAfterMs / 60000)} 分钟后重试。`
+            isEnglish ? `Rate limit: max ${IP_WINDOW_LIMIT} requests per IP + device fingerprint in 30 minutes.` : `限流：该 IP + 设备指纹 30 分钟内最多 ${IP_WINDOW_LIMIT} 次请求。`,
+            isEnglish ? `Please retry in ${Math.ceil(ipCheck.retryAfterMs / 60000)} minutes.` : `请 ${Math.ceil(ipCheck.retryAfterMs / 60000)} 分钟后重试。`
           ]
         },
         { status: 429, headers: { 'Retry-After': String(Math.ceil(ipCheck.retryAfterMs / 1000)) } }
@@ -640,7 +642,10 @@ export async function POST(req: NextRequest) {
     // 处理 API Key 未设置的错误
     if ((error as Error).message.includes('DEEPSEEK_API_KEY')) {
       return NextResponse.json(
-        { error: '配置错误', details: ['DeepSeek API Key 未配置，请设置 DEEPSEEK_API_KEY 环境变量。'] },
+        { 
+          error: isEnglish ? 'Configuration error' : '配置错误', 
+          details: [isEnglish ? 'DeepSeek API Key is not configured. Please set DEEPSEEK_API_KEY environment variable.' : 'DeepSeek API Key 未配置，请设置 DEEPSEEK_API_KEY 环境变量。'] 
+        },
         { status: 500 }
       )
     }
@@ -648,14 +653,20 @@ export async function POST(req: NextRequest) {
     // 处理 API 调用错误
     if (err?.status === 401 || (err?.message?.includes('Incorrect API key') || err?.message?.includes('Invalid API key'))) {
       return NextResponse.json(
-        { error: '认证失败', details: ['DeepSeek API Key 无效，请检查配置。'] },
+        { 
+          error: isEnglish ? 'Authentication failed' : '认证失败', 
+          details: [isEnglish ? 'DeepSeek API Key is invalid. Please check your configuration.' : 'DeepSeek API Key 无效，请检查配置。'] 
+        },
         { status: 401 }
       )
     }
 
     if (err?.status === 429) {
       return NextResponse.json(
-        { error: '限流中', details: ['DeepSeek API 触发限流，请稍后重试。'] },
+        { 
+          error: isEnglish ? 'Rate limited' : '限流中', 
+          details: [isEnglish ? 'DeepSeek API rate limited. Please try again later.' : 'DeepSeek API 触发限流，请稍后重试。'] 
+        },
         { status: 429 }
       )
     }
@@ -663,7 +674,10 @@ export async function POST(req: NextRequest) {
     // 处理网络/连接错误
     if (err?.cause?.code === 'ECONNRESET' || err?.cause?.code === 'ETIMEDOUT' || err?.code === 'ECONNRESET' || err?.code === 'ETIMEDOUT') {
       return NextResponse.json(
-        { error: '网络错误', details: ['网络连接错误，请稍后重试。'] },
+        { 
+          error: isEnglish ? 'Network error' : '网络错误', 
+          details: [isEnglish ? 'Network connection error. Please try again later.' : '网络连接错误，请稍后重试。'] 
+        },
         { status: 503 }
       )
     }
@@ -671,13 +685,19 @@ export async function POST(req: NextRequest) {
     // 处理 HTML 响应（可能是重定向或错误页面）
     if (err?.message?.includes('<!DOCTYPE') || err?.message?.includes('<html')) {
       return NextResponse.json(
-        { error: 'API 响应错误', details: ['收到 DeepSeek API 的异常响应，请检查 API Key 和网络配置。'] },
+        { 
+          error: isEnglish ? 'API response error' : 'API 响应错误', 
+          details: [isEnglish ? 'Received unexpected response from DeepSeek API. Please check your API Key and network configuration.' : '收到 DeepSeek API 的异常响应，请检查 API Key 和网络配置。'] 
+        },
         { status: 502 }
       )
     }
 
     return NextResponse.json(
-      { error: '生成失败', details: [(error as Error).message] },
+      { 
+        error: isEnglish ? 'Generation failed' : '生成失败', 
+        details: [(error as Error).message] 
+      },
       { status: 500 }
     )
   }

@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         valid: false,
         isPro: false,
-        message: '该令牌已被吊销',
+        message: 'Token has been revoked',
         revoked: true
       })
     }

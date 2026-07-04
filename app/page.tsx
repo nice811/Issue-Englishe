@@ -208,7 +208,8 @@ export default function Home() {
               .map(s => s.trim())
               .filter(Boolean)
           },
-          client: { ipHash: '', fingerprint: deviceFingerprint }
+          client: { ipHash: '', fingerprint: deviceFingerprint },
+          lang
         })
       })
 
@@ -278,7 +279,8 @@ export default function Home() {
           title: form.title,
           token: form.token,
           spelling: form.options.spelling,
-          fingerprint: deviceFingerprint
+          fingerprint: deviceFingerprint,
+          lang
         })
       })
 
@@ -305,7 +307,7 @@ export default function Home() {
     } finally {
       setExpanding(false)
     }
-  }, [form, updateField, deviceFingerprint])
+  }, [form, updateField, deviceFingerprint, lang])
 
   const confirmExpand = useCallback(async () => {
     setShowExpandConfirm(false)
@@ -322,7 +324,8 @@ export default function Home() {
           title: form.title,
           token: form.token,
           spelling: form.options.spelling,
-          fingerprint: deviceFingerprint
+          fingerprint: deviceFingerprint,
+          lang
         })
       })
 
@@ -349,7 +352,7 @@ export default function Home() {
     } finally {
       setExpanding(false)
     }
-  }, [form, updateField, deviceFingerprint])
+  }, [form, updateField, deviceFingerprint, lang])
 
   // ============ 复制 & 下载 ============
   const copyToClipboard = useCallback(async () => {

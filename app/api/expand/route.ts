@@ -54,11 +54,12 @@ function getClientKey(req: NextRequest, body: any): { ip: string; fingerprint: s
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { description, title } = body
+    const { description, title, lang } = body
 
     const { ip, fingerprint, token } = getClientKey(req, body)
 
     const isPro = token && isValidPaidToken(token)
+    const isEnglish = lang === 'en'
 
     let currentLimit = FREE_DAILY_EXPAND_LIMIT
     let counterToCheck = freeExpandCounter
@@ -69,8 +70,8 @@ export async function POST(req: NextRequest) {
       if (await isTokenRevoked(token)) {
         return NextResponse.json(
           {
-            error: '令牌已吊销',
-            message: '该令牌已被吊销，如有疑问请联系支持。',
+            error: isEnglish ? 'Token revoked' : '令牌已吊销',
+            message: isEnglish ? 'This token has been revoked. Contact support for assistance.' : '该令牌已被吊销，如有疑问请联系支持。',
             isPro: false
           },
           { status: 403 }
@@ -79,17 +80,17 @@ export async function POST(req: NextRequest) {
       // 设备绑定校验
       const deviceCheck = verifyTokenWithDevice(token, fingerprint)
       if (!deviceCheck.valid) {
-        let deviceError = '该令牌已绑定到其他设备。'
+        let deviceError = isEnglish ? 'This token is bound to another device.' : '该令牌已绑定到其他设备。'
         if (deviceCheck.error === 'DEVICE_MISMATCH') {
-          deviceError = '该令牌已绑定到其他设备，只能在绑定设备上使用。'
+          deviceError = isEnglish ? 'This token is bound to another device and can only be used there.' : '该令牌已绑定到其他设备，只能在绑定设备上使用。'
         } else if (deviceCheck.error === 'EXPIRED') {
-          deviceError = '该令牌已过期。'
+          deviceError = isEnglish ? 'This token has expired.' : '该令牌已过期。'
         } else if (deviceCheck.error === 'NOT_YET_VALID') {
-          deviceError = '该令牌尚未生效。'
+          deviceError = isEnglish ? 'This token is not yet valid.' : '该令牌尚未生效。'
         }
         return NextResponse.json(
           {
-            error: '设备不匹配',
+            error: isEnglish ? 'Device mismatch' : '设备不匹配',
             message: deviceError,
             isPro: false
           },
@@ -106,10 +107,10 @@ export async function POST(req: NextRequest) {
     if (!dailyCheck.allowed) {
       return NextResponse.json(
         {
-          error: '扩充额度已达',
+          error: isEnglish ? 'Expand limit reached' : '扩充额度已达',
           message: isPro
-            ? `已达到今日扩充上限（${currentLimit} 次/天）。约 ${Math.ceil(dailyCheck.retryAfterMs / 60000)} 分钟后重置。`
-            : `免费版每日扩充已达上限（${FREE_DAILY_EXPAND_LIMIT} 次/天）。升级 Pro 获取更多扩充次数。`,
+            ? (isEnglish ? `Daily expand limit reached (${currentLimit} uses/day). Resets in approximately ${Math.ceil(dailyCheck.retryAfterMs / 60000)} minutes.` : `已达到今日扩充上限（${currentLimit} 次/天）。约 ${Math.ceil(dailyCheck.retryAfterMs / 60000)} 分钟后重置。`)
+            : (isEnglish ? `Free daily expand limit reached (${FREE_DAILY_EXPAND_LIMIT} use/day). Upgrade to Pro for more expansions.` : `免费版每日扩充已达上限（${FREE_DAILY_EXPAND_LIMIT} 次/天）。升级 Pro 获取更多扩充次数。`),
           isPro,
           limit: currentLimit,
           used: dailyCheck.count,
@@ -121,7 +122,7 @@ export async function POST(req: NextRequest) {
 
     if (!description || description.trim().length < 5) {
       return NextResponse.json(
-        { error: '输入无效', message: '描述至少需要 5 个字符。' },
+        { error: isEnglish ? 'Invalid input' : '输入无效', message: isEnglish ? 'Description must be at least 5 characters.' : '描述至少需要 5 个字符。' },
         { status: 400 }
       )
     }
@@ -129,7 +130,7 @@ export async function POST(req: NextRequest) {
     const apiKey = process.env.DEEPSEEK_API_KEY
     if (!apiKey) {
       return NextResponse.json(
-        { error: '配置错误', message: '服务器配置错误。' },
+        { error: isEnglish ? 'Configuration error' : '配置错误', message: isEnglish ? 'Server configuration error.' : '服务器配置错误。' },
         { status: 500 }
       )
     }
@@ -175,7 +176,7 @@ export async function POST(req: NextRequest) {
       const errText = await resp.text().catch(() => '')
       console.error('[expand] DeepSeek error:', resp.status, errText)
       return NextResponse.json(
-        { error: 'AI 服务错误', message: `AI 服务错误（${resp.status}），请稍后重试。` },
+        { error: isEnglish ? 'AI service error' : 'AI 服务错误', message: isEnglish ? `AI service error (${resp.status}). Please try again later.` : `AI 服务错误（${resp.status}），请稍后重试。` },
         { status: 502 }
       )
     }
@@ -186,7 +187,7 @@ export async function POST(req: NextRequest) {
 
     if (!expanded || expanded.length < 20) {
       return NextResponse.json(
-        { error: 'AI 响应为空', message: 'AI 返回了空响应，请稍后重试。' },
+        { error: isEnglish ? 'Empty AI response' : 'AI 响应为空', message: isEnglish ? 'AI returned empty response. Please try again later.' : 'AI 返回了空响应，请稍后重试。' },
         { status: 502 }
       )
     }
@@ -209,7 +210,7 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error('[expand] Unexpected error:', err)
     return NextResponse.json(
-      { error: '服务器错误', message: '服务器内部错误。' },
+      { error: isEnglish ? 'Server error' : '服务器错误', message: isEnglish ? 'Internal server error.' : '服务器内部错误。' },
       { status: 500 }
     )
   }
