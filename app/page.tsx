@@ -129,11 +129,11 @@ export default function Home() {
     try {
       const resp = await fetch('/api/validate-token', {
         method: 'POST',
-        headers: { 'content-type': 'application/json' },
+        headers: { 'content-type': 'application/json', 'cache-control': 'no-cache' },
         body: JSON.stringify({ token, fingerprint: fp })
       })
       const data = await resp.json()
-      setTokenValidation({ valid: data.valid, isPro: data.isPro })
+      setTokenValidation({ valid: data.valid, isPro: data.isPro || false })
     } catch {
       setTokenValidation({ valid: false, isPro: false })
     }
@@ -831,7 +831,7 @@ export default function Home() {
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <a href="#contact" className="text-slate-500 hover:text-indigo-600 transition-colors">{t('footer.contact')}</a>
+              <a href="mailto:support@issue-englisher.com" className="text-slate-500 hover:text-indigo-600 transition-colors">{t('footer.contact')}</a>
               <span className="text-slate-300">|</span>
               <a href="#privacy" className="text-slate-500 hover:text-indigo-600 transition-colors">{t('footer.privacy')}</a>
               <span className="text-slate-300">|</span>
