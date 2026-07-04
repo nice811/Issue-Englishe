@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isValidPaidToken, getTokenQuota, verifyToken, verifyTokenWithDevice } from '../../../lib/token'
+import { isTokenRevoked } from '../../../lib/revocation'
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,6 +22,16 @@ export async function POST(req: NextRequest) {
         valid: false,
         isPro: false,
         message: 'Token is not recognized'
+      })
+    }
+
+    // 吊销检查
+    if (isTokenRevoked(trimmed)) {
+      return NextResponse.json({
+        valid: false,
+        isPro: false,
+        message: '该令牌已被吊销',
+        revoked: true
       })
     }
 
