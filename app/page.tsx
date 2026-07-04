@@ -831,6 +831,8 @@ export default function Home() {
               </div>
             </div>
             <div className="flex items-center gap-4">
+              <span className="text-slate-500">QQ: 494516063</span>
+              <span className="text-slate-300">|</span>
               <a href="mailto:support@issue-englisher.com" className="text-slate-500 hover:text-indigo-600 transition-colors">{t('footer.contact')}</a>
               <span className="text-slate-300">|</span>
               <a href="#privacy" className="text-slate-500 hover:text-indigo-600 transition-colors">{t('footer.privacy')}</a>
@@ -907,6 +909,7 @@ export default function Home() {
                         />
                       </div>
                       <p className="text-xs text-slate-500">{lang === 'zh' ? '微信扫码添加客服' : 'WeChat QR Code'}</p>
+                      <p className="text-xs text-slate-500 mt-2">{lang === 'zh' ? '或添加 QQ: 494516063' : 'Or add QQ: 494516063'}</p>
                     </div>
                   </div>
                 </div>
