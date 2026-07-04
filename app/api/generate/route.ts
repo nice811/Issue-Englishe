@@ -123,21 +123,21 @@ function validateInput(input: GenerateRequest): { valid: boolean; errors: string
   const errors: string[] = []
 
   if (!input.title || input.title.length < 1) {
-    errors.push('Title is required (1-120 characters).')
+    errors.push('标题不能为空（1-120字符）。')
   } else if (input.title.length > 120) {
-    errors.push('Title must be at most 120 characters.')
+    errors.push('标题不能超过120字符。')
   }
 
   if (!input.description || input.description.length < 15) {
-    errors.push('Description must be at least 15 characters.')
+    errors.push('问题描述至少需要15个字符。')
   }
 
   if (!input.expected || input.expected.length < 10) {
-    errors.push('Expected behavior must be at least 10 characters.')
+    errors.push('期望行为至少需要10个字符。')
   }
 
   if (!input.actual || input.actual.length < 10) {
-    errors.push('Actual behavior must be at least 10 characters.')
+    errors.push('实际行为至少需要10个字符。')
   }
 
   // Detect un-redacted sensitive data in title/description
@@ -151,7 +151,7 @@ function validateInput(input: GenerateRequest): { valid: boolean; errors: string
   const combinedCheck = (input.title || '') + ' ' + (input.description || '')
   for (const pattern of sensitivePatterns) {
     if (pattern.test(combinedCheck)) {
-      errors.push('Sensitive data detected. Please redact API keys, tokens, emails, and IP addresses before submitting.')
+      errors.push('检测到敏感数据。请在提交前脱敏 API 密钥、令牌、邮箱和 IP 地址。')
       break
     }
   }
