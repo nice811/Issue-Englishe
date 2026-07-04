@@ -69,8 +69,8 @@ export async function POST(req: NextRequest) {
       if (isTokenRevoked(token)) {
         return NextResponse.json(
           {
-            error: 'TOKEN_REVOKED',
-            message: 'This token has been revoked. Please contact support.',
+            error: '令牌已吊销',
+            message: '该令牌已被吊销，如有疑问请联系支持。',
             isPro: false
           },
           { status: 403 }
@@ -79,10 +79,18 @@ export async function POST(req: NextRequest) {
       // 设备绑定校验
       const deviceCheck = verifyTokenWithDevice(token, fingerprint)
       if (!deviceCheck.valid) {
+        let deviceError = '该令牌已绑定到其他设备。'
+        if (deviceCheck.error === 'DEVICE_MISMATCH') {
+          deviceError = '该令牌已绑定到其他设备，只能在绑定设备上使用。'
+        } else if (deviceCheck.error === 'EXPIRED') {
+          deviceError = '该令牌已过期。'
+        } else if (deviceCheck.error === 'NOT_YET_VALID') {
+          deviceError = '该令牌尚未生效。'
+        }
         return NextResponse.json(
           {
-            error: 'DEVICE_MISMATCH',
-            message: deviceCheck.error || 'This token is bound to another device.',
+            error: '设备不匹配',
+            message: deviceError,
             isPro: false
           },
           { status: 403 }
@@ -98,10 +106,10 @@ export async function POST(req: NextRequest) {
     if (!dailyCheck.allowed) {
       return NextResponse.json(
         {
-          error: 'EXPAND_LIMIT_REACHED',
+          error: '扩充额度已达',
           message: isPro
-            ? `Daily expand limit reached (${currentLimit}/day). Resets in ${Math.ceil(dailyCheck.retryAfterMs / 60000)} minutes.`
-            : `Free daily expand limit reached (${FREE_DAILY_EXPAND_LIMIT}/day). Upgrade to Pro for more.`,
+            ? `已达到今日扩充上限（${currentLimit} 次/天）。约 ${Math.ceil(dailyCheck.retryAfterMs / 60000)} 分钟后重置。`
+            : `免费版每日扩充已达上限（${FREE_DAILY_EXPAND_LIMIT} 次/天）。升级 Pro 获取更多扩充次数。`,
           isPro,
           limit: currentLimit,
           used: dailyCheck.count,
@@ -113,7 +121,7 @@ export async function POST(req: NextRequest) {
 
     if (!description || description.trim().length < 5) {
       return NextResponse.json(
-        { error: 'INVALID_INPUT', message: 'Description must be at least 5 characters.' },
+        { error: '输入无效', message: '描述至少需要 5 个字符。' },
         { status: 400 }
       )
     }
@@ -121,7 +129,7 @@ export async function POST(req: NextRequest) {
     const apiKey = process.env.DEEPSEEK_API_KEY
     if (!apiKey) {
       return NextResponse.json(
-        { error: 'API_KEY_MISSING', message: 'Server configuration error.' },
+        { error: '配置错误', message: '服务器配置错误。' },
         { status: 500 }
       )
     }
@@ -167,7 +175,7 @@ export async function POST(req: NextRequest) {
       const errText = await resp.text().catch(() => '')
       console.error('[expand] DeepSeek error:', resp.status, errText)
       return NextResponse.json(
-        { error: 'API_ERROR', message: `AI service error (${resp.status}). Please try again.` },
+        { error: 'AI 服务错误', message: `AI 服务错误（${resp.status}），请稍后重试。` },
         { status: 502 }
       )
     }
@@ -178,7 +186,7 @@ export async function POST(req: NextRequest) {
 
     if (!expanded || expanded.length < 20) {
       return NextResponse.json(
-        { error: 'EMPTY_RESPONSE', message: 'AI returned empty response. Please try again.' },
+        { error: 'AI 响应为空', message: 'AI 返回了空响应，请稍后重试。' },
         { status: 502 }
       )
     }
@@ -201,7 +209,7 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error('[expand] Unexpected error:', err)
     return NextResponse.json(
-      { error: 'SERVER_ERROR', message: 'Internal server error.' },
+      { error: '服务器错误', message: '服务器内部错误。' },
       { status: 500 }
     )
   }
