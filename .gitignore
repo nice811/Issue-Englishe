@@ -19,15 +19,11 @@ yarn-error.log*
 
 # local env files
 .env*.local
+.env
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-# admin (已明文提交，部署用明文)
-# app/admin/
-# app/api/admin/
-# 令牌生成教程.md
 
 # 令牌吊销黑名单（运行时生成，勿提交）
 .revoked-tokens.json
@@ -35,3 +31,24 @@ next-env.d.ts
 # 测试覆盖率报告
 coverage/
 *.lcov
+
+# 敏感文档（禁止提交）
+密钥禁止上传.txt
+*.key
+*.pem
+secrets/
+
+# 加密相关文件（已废弃明文部署）
+.admin-encrypted/
+scripts/admin-crypto.js
+DEPLOY_CRYPTO_KEY*
+
+# 内部文档（含架构/实现细节，禁止公开）
+开发文档.md
+部署指南.md
+部署测试用例.md
+测试用例.md
+界面语言规范.md
+seo优化指南.md
+令牌生成教程.md
+DEPLOYMENT.md
