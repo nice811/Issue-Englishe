@@ -477,7 +477,7 @@ export default function Home() {
                     <button
                       type="button"
                       onClick={expandDescription}
-                      disabled={expanding || form.description.length < 10 || (expandUsage !== null && expandUsage.remaining <= 0 && !isProUser)}
+                      disabled={expanding || form.description.length < 5 || (expandUsage !== null && expandUsage.remaining <= 0 && !isProUser)}
                       className={`text-xs font-medium flex items-center gap-1 transition ${
                         isProUser
                           ? 'text-indigo-600 hover:text-indigo-700 disabled:text-slate-400 disabled:cursor-not-allowed'

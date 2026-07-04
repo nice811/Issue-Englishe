@@ -178,8 +178,8 @@ describe('isValidPaidToken', () => {
     expect(isValidPaidToken(token)).toBe(false)
   })
 
-  it('should fallback accept legacy ie_ tokens', () => {
-    expect(isValidPaidToken('ie_abc123def456ghi7')).toBe(true)
+  it('should reject legacy ie_ tokens without signature', () => {
+    expect(isValidPaidToken('ie_abc123def456ghi7')).toBe(false)
   })
 })
 
@@ -224,8 +224,8 @@ describe('getTokenPlan', () => {
     expect(getTokenPlan('invalid-token')).toBe('free')
   })
 
-  it('should fallback to pro for legacy ie_ tokens', () => {
-    expect(getTokenPlan('ie_abc123def456ghi7')).toBe('pro')
+  it('should return free for legacy ie_ tokens without signature', () => {
+    expect(getTokenPlan('ie_abc123def456ghi7')).toBe('free')
   })
 })
 
