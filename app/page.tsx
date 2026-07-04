@@ -258,7 +258,7 @@ export default function Home() {
 
   // ============ 智能扩充 ============
   const expandDescription = useCallback(async () => {
-    if (!form.description || form.description.length < 10) return
+    if (!form.description || form.description.trim().length < 5) return
 
     if (form.token.trim().length === 0) {
       setShowExpandConfirm(true)

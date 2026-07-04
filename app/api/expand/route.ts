@@ -111,9 +111,9 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    if (!description || description.length < 10) {
+    if (!description || description.trim().length < 5) {
       return NextResponse.json(
-        { error: 'INVALID_INPUT', message: 'Description must be at least 10 characters.' },
+        { error: 'INVALID_INPUT', message: 'Description must be at least 5 characters.' },
         { status: 400 }
       )
     }
