@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 吊销检查
-    if (isTokenRevoked(trimmed)) {
+    if (await isTokenRevoked(trimmed)) {
       return NextResponse.json({
         valid: false,
         isPro: false,

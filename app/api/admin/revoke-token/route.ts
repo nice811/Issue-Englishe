@@ -16,11 +16,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Token is required' }, { status: 400 })
     }
 
-    if (isTokenRevoked(token)) {
+    if (await isTokenRevoked(token)) {
       return NextResponse.json({ error: 'Token already revoked' }, { status: 400 })
     }
 
-    revokeToken(token, reason)
+    await revokeToken(token, reason)
 
     return NextResponse.json({ success: true, token })
   } catch (error) {
@@ -42,7 +42,7 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: 'Token is required' }, { status: 400 })
     }
 
-    const success = restoreToken(token)
+    const success = await restoreToken(token)
 
     if (!success) {
       return NextResponse.json({ error: 'Token not found in revoked list' }, { status: 404 })
@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const revoked = listRevokedTokens()
+    const revoked = await listRevokedTokens()
     return NextResponse.json(revoked)
   } catch (error) {
     console.error('List revoked tokens error:', error)

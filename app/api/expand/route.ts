@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
 
     if (isPro) {
       // 吊销检查
-      if (isTokenRevoked(token)) {
+      if (await isTokenRevoked(token)) {
         return NextResponse.json(
           {
             error: '令牌已吊销',
