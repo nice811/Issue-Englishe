@@ -442,7 +442,7 @@ export default function Home() {
                 {t('form.title')} {t('common.required')}
               </h2>
               <p className="text-xs text-slate-500 mt-1">
-                {isProUser ? 'Pro 版 — 已去水印、更高额度' : '免费版 — 附水印、10 次/天'}
+                {isProUser ? t('common.proTierHint') : t('common.freeTierHint')}
               </p>
             </div>
 
