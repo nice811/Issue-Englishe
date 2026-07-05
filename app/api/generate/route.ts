@@ -280,10 +280,13 @@ function buildDeveloperPrompt(spelling: 'us' | 'uk', watermark: boolean): string
     '   - If user did not provide: output "Provide a minimal repro."\n' +
     '   - Never leave numbered steps empty\n' +
     '\n' +
-    '5. REPRO FREQUENCY (required, separate line after Steps)\n' +
-    '   - Format: "Repro frequency: always | often | rarely | unknown (please confirm)"\n' +
-    '   - When frequency is unknown: use "Repro frequency: unknown (please confirm)"\n' +
-    '   - Example: "Repro frequency: always"\n' +
+    '5. REPRO FREQUENCY (required, separate section after Steps)\n' +
+    '   - Use markdown subheading: "### Repro Frequency"\n' +
+    '   - Format: "always | often | rarely | unknown (please confirm)"\n' +
+    '   - When frequency is unknown: use "unknown (please confirm)"\n' +
+    '   - Example:\n' +
+    '     ### Repro Frequency\n' +
+    '     always\n' +
     '\n' +
     '6. SPELLING\n' +
     '   - Use ' + (spelling === 'uk' ? 'British' : 'American') + ' English consistently\n' +
@@ -316,7 +319,7 @@ function buildDeveloperPrompt(spelling: 'us' | 'uk', watermark: boolean): string
     '12. UNKNOWN INFORMATION\n' +
     '    - Never leave truly empty; use explicit placeholders\n' +
     '    - Examples:\n' +
-    '      - "Repro frequency: unknown"\n' +
+    '      - "### Repro Frequency\\nunknown"\n' +
     '      - "OS: Unknown - please confirm."\n' +
     '      - "Error message: Not provided"\n'
 }
@@ -374,7 +377,9 @@ Steps to Reproduce
 2. Fill out the form
 3. Click the confirmation button
 
-Repro frequency: unknown (please confirm)
+### Repro Frequency
+
+unknown (please confirm)
 
 Expected Behavior
 
@@ -412,7 +417,9 @@ Steps to Reproduce
 2. Include Authorization header with Bearer token
 3. Observe HTTP 500 response
 
-Repro frequency: always
+### Repro Frequency
+
+always
 
 Expected Behavior
 
