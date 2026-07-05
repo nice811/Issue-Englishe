@@ -441,7 +441,36 @@ Labels
 - priority/high
 `
 
-// ============ 标签建议（精简版，避免重复） ============
+// ============ 从 Markdown 中提取 Labels ============
+function extractLabelsFromMarkdown(markdown: string): string[] | null {
+  const lines = markdown.split('\n')
+  let inLabelsSection = false
+  const labels: string[] = []
+
+  for (const line of lines) {
+    const trimmed = line.trim()
+    
+    if (/^Labels\s*$/i.test(trimmed)) {
+      inLabelsSection = true
+      continue
+    }
+    
+    if (inLabelsSection) {
+      if (trimmed === '' || trimmed.startsWith('---') || /^#+\s/.test(trimmed)) {
+        break
+      }
+      
+      const labelMatch = trimmed.match(/^[-*]\s+(.+)$/)
+      if (labelMatch && labelMatch[1]) {
+        labels.push(labelMatch[1].trim())
+      }
+    }
+  }
+
+  return labels.length > 0 ? labels : null
+}
+
+// ============ 标签建议（精简版，避免重复) ============
 function suggestLabels(description: string, title: string): string[] {
   const text = (description + ' ' + title).toLowerCase()
   const labels: Set<string> = new Set()
@@ -622,11 +651,15 @@ export async function POST(req: NextRequest) {
     const completionTokens = completion.usage?.completion_tokens || 0
     const totalTokens = promptTokens + completionTokens
 
-    // 10) 返回响应（严格按契约）
+    // 10) 提取 Labels，优先使用 AI 生成的，保证一致性
+    const extractedLabels = extractLabelsFromMarkdown(modelOutput)
+    const finalLabels = extractedLabels || suggestLabels(body.description, body.title)
+
+    // 11) 返回响应（严格按契约）
     return NextResponse.json({
       markdown,
       watermark,
-      labels: suggestLabels(body.description, body.title),
+      labels: finalLabels,
       usage: {
         countToday,
         limit: currentLimit
