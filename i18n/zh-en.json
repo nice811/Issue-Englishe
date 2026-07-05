@@ -52,7 +52,14 @@
       "spelling": "拼写",
       "accessToken": "访问令牌",
       "tokenPlaceholder": "留空使用免费版",
-      "tokenHint": "Pro 用户：输入令牌"
+      "tokenHint": "Pro 用户：输入令牌",
+      "customApiKey": "自定义 API Key",
+      "customApiKeyPlaceholder": "使用您自己的 API Key（留空使用默认）",
+      "customApiKeyHint": "使用您的 DeepSeek / OpenAI API Key，费用由您承担",
+      "customApiBase": "API Base URL",
+      "customTemplate": "自定义 Issue 模板",
+      "customTemplatePlaceholder": "输入您的自定义提示词模板...",
+      "customTemplateHint": "支持完整的系统提示词，用于生成符合团队规范的 Issue 格式"
     },
     "preview": {
       "title": "Issue 预览",
@@ -194,7 +201,14 @@
       "spelling": "Spelling",
       "accessToken": "Access Token",
       "tokenPlaceholder": "Leave empty for free tier",
-      "tokenHint": "Pro users: enter token"
+      "tokenHint": "Pro users: enter token",
+      "customApiKey": "Custom API Key",
+      "customApiKeyPlaceholder": "Use your own API Key (leave empty for default)",
+      "customApiKeyHint": "Use your DeepSeek/OpenAI API Key, you pay the cost",
+      "customApiBase": "API Base URL",
+      "customTemplate": "Custom Issue Template",
+      "customTemplatePlaceholder": "Enter your custom prompt template...",
+      "customTemplateHint": "Full system prompt support for team-specific Issue formats"
     },
     "preview": {
       "title": "Issue Preview",

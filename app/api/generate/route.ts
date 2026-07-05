@@ -33,6 +33,9 @@ interface GenerateRequest {
   client?: ClientData
   token?: string
   lang?: string
+  customApiKey?: string
+  customApiBase?: string
+  customTemplate?: string
 }
 
 // ============ 限流配置 ============
@@ -161,9 +164,9 @@ function validateInput(input: GenerateRequest): { valid: boolean; errors: string
   return { valid: errors.length === 0, errors }
 }
 
-// ============ DeepSeek 客户端初始化 ============
-function getDeepSeekClient(): OpenAI {
-  const apiKey = process.env.DEEPSEEK_API_KEY || ''
+// ============ AI 客户端初始化 ============
+function getAIClient(customApiKey?: string, customApiBase?: string): OpenAI {
+  const apiKey = customApiKey || process.env.DEEPSEEK_API_KEY || ''
 
   if (!apiKey) {
     throw new Error('DEEPSEEK_API_KEY environment variable is not set')
@@ -171,7 +174,7 @@ function getDeepSeekClient(): OpenAI {
 
   return new OpenAI({
     apiKey,
-    baseURL: 'https://api.deepseek.com'
+    baseURL: customApiBase || 'https://api.deepseek.com'
   })
 }
 
@@ -551,17 +554,9 @@ export async function POST(req: NextRequest) {
     let currentLimit = ANONYMOUS_DAILY_LIMIT
     let counterToCheck = anonymousDailyCounter
     let keyToCheck = ip + '|' + fingerprint
+    const isPro = token && token.trim().length > 0 && isValidPaidToken(token)
 
-    if (token && token.trim().length > 0) {
-      if (!isValidPaidToken(token)) {
-        return NextResponse.json(
-          {
-            error: isEnglish ? 'Invalid token' : '令牌无效',
-            details: [isEnglish ? 'Access token not recognized. Leave empty for free tier or contact support.' : '访问令牌无法识别。留空使用免费版，或联系支持获取帮助。']
-          },
-          { status: 401 }
-        )
-      }
+    if (isPro) {
       // 吊销检查
       if (await isTokenRevoked(token)) {
         return NextResponse.json(
@@ -595,10 +590,14 @@ export async function POST(req: NextRequest) {
       currentLimit = quota.generate > 0 ? quota.generate : TOKEN_DAILY_LIMIT
       counterToCheck = tokenDailyCounter
       keyToCheck = token
+
+      if (quota.generate === -1) {
+        currentLimit = 999999
+      }
     }
 
     const dailyCheck = incrementAndCheck(counterToCheck, keyToCheck, currentLimit, DAY_MS)
-    if (!dailyCheck.allowed) {
+    if (!dailyCheck.allowed && currentLimit !== 999999) {
       return NextResponse.json(
         {
           error: isEnglish ? 'Limit reached' : '额度已达',
@@ -631,14 +630,35 @@ export async function POST(req: NextRequest) {
     const watermark = determineWatermark({ token, env: process.env })
     const spelling = body.options?.spelling || 'us'
 
-    // 6) 调用 DeepSeek API
-    const client = getDeepSeekClient()
+    // 6) 调用 AI API（支持自定义 API Key 和模板）
+    const customApiKey = body.customApiKey?.trim()
+    const customApiBase = body.customApiBase?.trim()
+    
+    if (customApiKey && !isPro) {
+      return NextResponse.json(
+        {
+          error: isEnglish ? 'Pro feature required' : '需要 Pro 版',
+          message: isEnglish ? 'Custom API Key is a Pro feature. Please upgrade.' : '自定义 API Key 是 Pro 版功能，请升级后使用。'
+        },
+        { status: 402 }
+      )
+    }
+
+    const client = getAIClient(customApiKey, customApiBase)
+
+    const systemPrompt = body.customTemplate?.trim() 
+      ? body.customTemplate 
+      : SYSTEM_PROMPT + '\n\n' + buildDeveloperPrompt(spelling, watermark)
+
+    const userPrompt = body.customTemplate?.trim()
+      ? `Generate a GitHub issue based on the following input:\n\nTitle: ${body.title}\nDescription: ${body.description}\nSteps: ${(body.steps || []).join('\n')}\nExpected: ${body.expected}\nActual: ${body.actual}`
+      : buildUserPrompt(body) + FEW_SHOT_EXAMPLES
 
     const completion = await client.chat.completions.create({
       model: 'deepseek-chat',
       messages: [
-        { role: 'system', content: SYSTEM_PROMPT + '\n\n' + buildDeveloperPrompt(spelling, watermark) },
-        { role: 'user', content: buildUserPrompt(body) + FEW_SHOT_EXAMPLES }
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
       ],
       temperature: 0.3,
       max_tokens: 2048

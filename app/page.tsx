@@ -17,7 +17,9 @@ interface EnvData {
 interface OptionsData {
   spelling: 'us' | 'uk'
   suggestLabels: boolean
-  // watermark intentionally removed — decided server-side only
+  customApiKey: string
+  customApiBase: string
+  customTemplate: string
 }
 
 interface FormState {
@@ -54,7 +56,10 @@ const initialState: FormState = {
   env: { os: '', appVersion: '', deps: '', logs: '' },
   options: {
     spelling: 'us',
-    suggestLabels: true
+    suggestLabels: true,
+    customApiKey: '',
+    customApiBase: '',
+    customTemplate: ''
   },
   token: ''
 }
@@ -209,7 +214,10 @@ export default function Home() {
               .filter(Boolean)
           },
           client: { ipHash: '', fingerprint: deviceFingerprint },
-          lang
+          lang,
+          customApiKey: form.options.customApiKey,
+          customApiBase: form.options.customApiBase,
+          customTemplate: form.options.customTemplate
         })
       })
 
@@ -711,6 +719,46 @@ export default function Home() {
                       {watermark
                         ? t('common.freeTierWatermark')
                         : t('common.proTierNoWatermark')}
+                    </div>
+                  )}
+
+                  {/* Pro 版自定义选项 */}
+                  {isProUser && (
+                    <div className="border-t border-slate-100 pt-4 space-y-3">
+                      <div>
+                        <label className="block text-xs text-slate-600 mb-1">{t('form.customApiKey')}</label>
+                        <input
+                          type="password"
+                          value={form.options.customApiKey}
+                          onChange={(e) => updateOptions('customApiKey', e.target.value)}
+                          placeholder={t('form.customApiKeyPlaceholder')}
+                          className="w-full px-3 py-2 text-sm font-mono border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        />
+                        <p className="text-xs text-slate-400 mt-1">{t('form.customApiKeyHint')}</p>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs text-slate-600 mb-1">{t('form.customApiBase')}</label>
+                        <input
+                          type="text"
+                          value={form.options.customApiBase}
+                          onChange={(e) => updateOptions('customApiBase', e.target.value)}
+                          placeholder="https://api.deepseek.com"
+                          className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs text-slate-600 mb-1">{t('form.customTemplate')}</label>
+                        <textarea
+                          value={form.options.customTemplate}
+                          onChange={(e) => updateOptions('customTemplate', e.target.value)}
+                          placeholder={t('form.customTemplatePlaceholder')}
+                          rows={4}
+                          className="w-full px-3 py-2 text-sm font-mono border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
+                        />
+                        <p className="text-xs text-slate-400 mt-1">{t('form.customTemplateHint')}</p>
+                      </div>
                     </div>
                   )}
 
