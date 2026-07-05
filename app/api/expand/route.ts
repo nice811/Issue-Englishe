@@ -52,14 +52,16 @@ function getClientKey(req: NextRequest, body: any): { ip: string; fingerprint: s
 }
 
 export async function POST(req: NextRequest) {
+  let lang = 'zh'
   try {
     const body = await req.json()
-    const { description, title, lang } = body
+    const { description, title, lang: bodyLang } = body
+    lang = bodyLang || 'zh'
+    const isEnglish = lang === 'en'
 
     const { ip, fingerprint, token } = getClientKey(req, body)
 
     const isPro = token && isValidPaidToken(token)
-    const isEnglish = lang === 'en'
 
     let currentLimit = FREE_DAILY_EXPAND_LIMIT
     let counterToCheck = freeExpandCounter
@@ -209,6 +211,7 @@ export async function POST(req: NextRequest) {
     })
   } catch (err) {
     console.error('[expand] Unexpected error:', err)
+    const isEnglish = lang === 'en'
     return NextResponse.json(
       { error: isEnglish ? 'Server error' : '服务器错误', message: isEnglish ? 'Internal server error.' : '服务器内部错误。' },
       { status: 500 }

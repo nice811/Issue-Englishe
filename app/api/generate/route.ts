@@ -492,9 +492,12 @@ function suggestLabels(description: string, title: string): string[] {
 // ============ API 路由 ============
 export async function POST(req: NextRequest) {
   const startTime = Date.now()
+  let lang = 'zh'
 
   try {
     const body = await req.json() as GenerateRequest
+    lang = body.lang || 'zh'
+    const isEnglish = lang === 'en'
 
     // 1) 输入校验
     const validation = validateInput(body)
@@ -636,6 +639,7 @@ export async function POST(req: NextRequest) {
 
   } catch (error) {
     console.error('[generate] Generation failed:', error)
+    const isEnglish = lang === 'en'
 
     const err = error as any
 
