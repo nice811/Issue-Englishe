@@ -80,6 +80,21 @@
       "requestFailed": "请求失败",
       "invalidToken": "令牌无效"
     },
+    "upgrade": {
+      "modalTitle": "升级 Pro",
+      "modalSubtitle": "解锁 Pro 全部功能",
+      "noWatermark": "无水印输出",
+      "noWatermarkDesc": "生成的 Issue 不再包含水印",
+      "highQuota": "200 次/天额度",
+      "highQuotaDesc": "比免费版多 20 倍的使用次数",
+      "ukSpelling": "英式拼写支持",
+      "ukSpellingDesc": "支持 colour/organise 等英式拼写",
+      "prioritySupport": "优先技术支持",
+      "prioritySupportDesc": "更快响应和专属支持渠道",
+      "scanToUpgrade": "扫码添加客服开通 Pro",
+      "wechatScan": "微信扫码添加客服",
+      "orAddQQ": "或添加 QQ: 494516063"
+    },
     "admin": {
       "title": "管理后台",
       "welcome": "欢迎回来",
@@ -206,6 +221,21 @@
       "rateLimited": "Rate limited",
       "requestFailed": "Request failed",
       "invalidToken": "Invalid token"
+    },
+    "upgrade": {
+      "modalTitle": "Upgrade to Pro",
+      "modalSubtitle": "Unlock all Pro features",
+      "noWatermark": "No Watermark",
+      "noWatermarkDesc": "Generated Issues will not include a watermark",
+      "highQuota": "200 uses/day quota",
+      "highQuotaDesc": "20x more uses than the free tier",
+      "ukSpelling": "UK Spelling Support",
+      "ukSpellingDesc": "Supports British spelling like colour/organise",
+      "prioritySupport": "Priority Support",
+      "prioritySupportDesc": "Faster response and dedicated support",
+      "scanToUpgrade": "Scan to upgrade to Pro",
+      "wechatScan": "WeChat QR Code",
+      "orAddQQ": "Or add QQ: 494516063"
     },
     "admin": {
       "title": "Admin Dashboard",

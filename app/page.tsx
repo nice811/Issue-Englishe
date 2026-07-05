@@ -851,8 +851,8 @@ export default function Home() {
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowUpgradeModal(false)}>
               <div className="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden" onClick={(e) => e.stopPropagation()}>
                 <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-5">
-                  <h3 className="text-xl font-bold text-white">{t('common.upgrade')}</h3>
-                  <p className="text-indigo-100 text-sm mt-1">Unlock Pro features</p>
+                  <h3 className="text-xl font-bold text-white">{t('upgrade.modalTitle')}</h3>
+                  <p className="text-indigo-100 text-sm mt-1">{t('upgrade.modalSubtitle')}</p>
                 </div>
                 <div className="p-6 space-y-4">
                   <div className="space-y-3">
@@ -863,8 +863,8 @@ export default function Home() {
                         </svg>
                       </div>
                       <div>
-                        <p className="font-medium text-slate-800">无水印输出</p>
-                        <p className="text-sm text-slate-500">生成的 Issue 不再包含水印</p>
+                        <p className="font-medium text-slate-800">{t('upgrade.noWatermark')}</p>
+                        <p className="text-sm text-slate-500">{t('upgrade.noWatermarkDesc')}</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
@@ -874,8 +874,8 @@ export default function Home() {
                         </svg>
                       </div>
                       <div>
-                        <p className="font-medium text-slate-800">200 次/天额度</p>
-                        <p className="text-sm text-slate-500">比免费版多 20 倍的使用次数</p>
+                        <p className="font-medium text-slate-800">{t('upgrade.highQuota')}</p>
+                        <p className="text-sm text-slate-500">{t('upgrade.highQuotaDesc')}</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
@@ -885,8 +885,8 @@ export default function Home() {
                         </svg>
                       </div>
                       <div>
-                        <p className="font-medium text-slate-800">英式拼写支持</p>
-                        <p className="text-sm text-slate-500">支持 colour/organise 等英式拼写</p>
+                        <p className="font-medium text-slate-800">{t('upgrade.ukSpelling')}</p>
+                        <p className="text-sm text-slate-500">{t('upgrade.ukSpellingDesc')}</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
@@ -896,14 +896,14 @@ export default function Home() {
                         </svg>
                       </div>
                       <div>
-                        <p className="font-medium text-slate-800">优先技术支持</p>
-                        <p className="text-sm text-slate-500">更快响应和专属支持渠道</p>
+                        <p className="font-medium text-slate-800">{t('upgrade.prioritySupport')}</p>
+                        <p className="text-sm text-slate-500">{t('upgrade.prioritySupportDesc')}</p>
                       </div>
                     </div>
                   </div>
                   <div className="pt-4 border-t border-slate-100">
                     <div className="text-center">
-                      <p className="text-sm text-slate-600 mb-3">{lang === 'zh' ? '扫码添加客服开通 Pro' : 'Scan to upgrade to Pro'}</p>
+                      <p className="text-sm text-slate-600 mb-3">{t('upgrade.scanToUpgrade')}</p>
                       <div className="w-32 h-32 mx-auto bg-white rounded-lg border border-slate-200 flex items-center justify-center mb-3 overflow-hidden">
                         <img 
                           src="https://img.cdn1.vip/i/6a3a03270b161_1782186791.webp" 
@@ -911,8 +911,8 @@ export default function Home() {
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      <p className="text-xs text-slate-500">{lang === 'zh' ? '微信扫码添加客服' : 'WeChat QR Code'}</p>
-                      <p className="text-xs text-slate-500 mt-2">{lang === 'zh' ? '或添加 QQ: 494516063' : 'Or add QQ: 494516063'}</p>
+                      <p className="text-xs text-slate-500">{t('upgrade.wechatScan')}</p>
+                      <p className="text-xs text-slate-500 mt-2">{t('upgrade.orAddQQ')}</p>
                     </div>
                   </div>
                 </div>
