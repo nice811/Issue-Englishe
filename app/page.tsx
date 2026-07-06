@@ -120,10 +120,34 @@ export default function Home() {
   const [tokenValidation, setTokenValidation] = useState<{ valid: boolean; isPro: boolean } | null>(null)
   const [deviceFingerprint, setDeviceFingerprint] = useState<string>('')
 
-  // 初始化语言和设备指纹（仅客户端）
+  // 初始化语言、设备指纹和表单恢复（仅客户端）
   useEffect(() => {
     setLang(getBrowserLanguage())
     setDeviceFingerprint(generateDeviceFingerprint())
+
+    // 从 localStorage 恢复表单数据
+    try {
+      const saved = localStorage.getItem('ie_form_draft')
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        setForm(prev => ({
+          ...prev,
+          title: parsed.title || '',
+          description: parsed.description || '',
+          steps: Array.isArray(parsed.steps) && parsed.steps.length > 0 ? parsed.steps : [''],
+          expected: parsed.expected || '',
+          actual: parsed.actual || '',
+          env: {
+            os: parsed.env?.os || '',
+            appVersion: parsed.env?.appVersion || '',
+            deps: parsed.env?.deps || '',
+            logs: parsed.env?.logs || ''
+          }
+        }))
+      }
+    } catch {
+      // ignore parse error
+    }
   }, [])
 
   const validateToken = useCallback(async (token: string, fp?: string) => {
@@ -150,6 +174,23 @@ export default function Home() {
     }, 500)
     return () => clearTimeout(timer)
   }, [form.token, validateToken, deviceFingerprint])
+
+  // 自动保存表单到 localStorage（排除 token 和 options）
+  useEffect(() => {
+    const draft = {
+      title: form.title,
+      description: form.description,
+      steps: form.steps,
+      expected: form.expected,
+      actual: form.actual,
+      env: form.env
+    }
+    try {
+      localStorage.setItem('ie_form_draft', JSON.stringify(draft))
+    } catch {
+      // ignore storage error
+    }
+  }, [form.title, form.description, form.steps, form.expected, form.actual, form.env])
 
   // 翻译函数
   const t = useCallback((key: string, params?: Record<string, string | number>) => getText(lang, key, params), [lang])
@@ -258,6 +299,13 @@ export default function Home() {
       setLabels(success.labels)
       setUsage(success.usage)
       setWatermark(success.watermark) // read-only from server
+
+      // 生成成功后清除草稿
+      try {
+        localStorage.removeItem('ie_form_draft')
+      } catch {
+        // ignore
+      }
     } catch (err) {
       setError((err as Error).message)
     } finally {
@@ -836,6 +884,17 @@ export default function Home() {
                 ) : (
                   <>{t('common.generate')} <span className="opacity-60 text-xs">(⌘+Enter)</span></>
                 )}
+              </button>
+
+              {/* Clear draft */}
+              <button
+                onClick={() => {
+                  setForm(initialState)
+                  localStorage.removeItem('ie_form_draft')
+                }}
+                className="w-full text-xs text-slate-400 hover:text-slate-600 py-1 transition"
+              >
+                {t('common.clearDraft')}
               </button>
             </div>
           </section>
