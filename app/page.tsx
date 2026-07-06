@@ -398,7 +398,7 @@ export default function Home() {
 
   // ============ 派生显示数据 ============
   const remaining = usage ? usage.limit - usage.countToday : null
-  const isProUser = useMemo(() => tokenValidation?.isPro ?? false, [tokenValidation])
+  const isProUser = useMemo(() => (tokenValidation?.valid && tokenValidation?.isPro) ?? false, [tokenValidation])
   const descTooShort = form.description.length > 0 && form.description.length < 50
 
   return (
