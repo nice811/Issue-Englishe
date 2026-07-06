@@ -74,7 +74,9 @@
       "expandConfirmTitle": "免费扩充机会",
       "expandConfirmDesc": "免费版每天可使用 1 次智能扩充，确定要使用吗？",
       "expandConfirmBtn": "使用免费机会",
-      "expandCancel": "取消"
+      "expandCancel": "取消",
+      "history": "最近生成",
+      "clearHistory": "清空"
     },
     "footer": {
       "copyright": "© 2026 Issue Englisher. All rights reserved.",
@@ -225,7 +227,9 @@
       "expandConfirmTitle": "Free Expand Opportunity",
       "expandConfirmDesc": "Free tier gets 1 expand per day. Are you sure you want to use it now?",
       "expandConfirmBtn": "Use Free Expand",
-      "expandCancel": "Cancel"
+      "expandCancel": "Cancel",
+      "history": "Recent",
+      "clearHistory": "Clear"
     },
     "footer": {
       "copyright": "© 2026 Issue Englisher. All rights reserved.",

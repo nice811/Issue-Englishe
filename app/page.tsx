@@ -120,7 +120,16 @@ export default function Home() {
   const [tokenValidation, setTokenValidation] = useState<{ valid: boolean; isPro: boolean } | null>(null)
   const [deviceFingerprint, setDeviceFingerprint] = useState<string>('')
 
-  // 初始化语言、设备指纹和表单恢复（仅客户端）
+  interface HistoryItem {
+    id: string
+    title: string
+    markdown: string
+    labels: string[]
+    timestamp: number
+  }
+  const [history, setHistory] = useState<HistoryItem[]>([])
+
+  // 初始化语言、设备指纹、表单恢复和历史记录（仅客户端）
   useEffect(() => {
     setLang(getBrowserLanguage())
     setDeviceFingerprint(generateDeviceFingerprint())
@@ -144,6 +153,19 @@ export default function Home() {
             logs: parsed.env?.logs || ''
           }
         }))
+      }
+    } catch {
+      // ignore parse error
+    }
+
+    // 从 localStorage 恢复历史记录
+    try {
+      const savedHistory = localStorage.getItem('ie_history')
+      if (savedHistory) {
+        const parsed = JSON.parse(savedHistory)
+        if (Array.isArray(parsed)) {
+          setHistory(parsed)
+        }
       }
     } catch {
       // ignore parse error
@@ -300,12 +322,29 @@ export default function Home() {
       setUsage(success.usage)
       setWatermark(success.watermark) // read-only from server
 
-      // 生成成功后清除草稿
+      // 生成成功后清除草稿并保存历史记录
       try {
         localStorage.removeItem('ie_form_draft')
       } catch {
         // ignore
       }
+
+      const newItem: HistoryItem = {
+        id: Date.now().toString(),
+        title: form.title || 'Untitled',
+        markdown: success.markdown,
+        labels: success.labels,
+        timestamp: Date.now()
+      }
+      setHistory(prev => {
+        const updated = [newItem, ...prev].slice(0, 10)
+        try {
+          localStorage.setItem('ie_history', JSON.stringify(updated))
+        } catch {
+          // ignore
+        }
+        return updated
+      })
     } catch (err) {
       setError((err as Error).message)
     } finally {
@@ -959,6 +998,57 @@ export default function Home() {
                 </div>
               )}
             </div>
+
+            {/* History */}
+            {history.length > 0 && (
+              <div className="border-t border-slate-100 bg-slate-50">
+                <div className="px-5 py-3 flex items-center justify-between">
+                  <h4 className="text-xs font-semibold text-slate-500 uppercase">{t('preview.history')}</h4>
+                  <button
+                    onClick={() => {
+                      setHistory([])
+                      try { localStorage.removeItem('ie_history') } catch { /* ignore */ }
+                    }}
+                    className="text-[11px] text-slate-400 hover:text-red-600 transition"
+                  >
+                    {t('preview.clearHistory')}
+                  </button>
+                </div>
+                <div className="px-5 pb-3 space-y-2 max-h-48 overflow-auto">
+                  {history.map(item => (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        setMarkdown(item.markdown)
+                        setLabels(item.labels)
+                      }}
+                      className="w-full text-left px-3 py-2 bg-white border border-slate-200 rounded-lg hover:border-indigo-300 hover:shadow-sm transition group"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-slate-700 truncate flex-1 pr-2 group-hover:text-indigo-700">
+                          {item.title}
+                        </span>
+                        <span className="text-[10px] text-slate-400 shrink-0">
+                          {new Date(item.timestamp).toLocaleDateString()}
+                        </span>
+                      </div>
+                      {item.labels.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-1.5">
+                          {item.labels.slice(0, 3).map(label => (
+                            <span key={label} className="px-1.5 py-0.5 text-[10px] rounded-full bg-slate-100 text-slate-600">
+                              {label}
+                            </span>
+                          ))}
+                          {item.labels.length > 3 && (
+                            <span className="text-[10px] text-slate-400">+{item.labels.length - 3}</span>
+                          )}
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </section>
         </div>
       </main>
