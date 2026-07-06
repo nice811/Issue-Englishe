@@ -145,22 +145,6 @@ function validateInput(input: GenerateRequest): { valid: boolean; errors: string
     errors.push(isEnglish ? 'Actual behavior must be at least 10 characters.' : '实际行为至少需要10个字符。')
   }
 
-  // Detect un-redacted sensitive data in title/description
-  const sensitivePatterns = [
-    /(api[-_]?key|secret|token|password|bearer)\s*[:=]?\s*[A-Za-z0-9_\-+]{8,}/i,
-    /Authorization:\s*Bearer\s+[A-Za-z0-9_\-\.]+/i,
-    /https?:\/\/[^\s:]+:[^\s@]+@[^\s]+/i,
-    /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/,
-    /\b(?:\d{1,3}\.){3}\d{1,3}(?::\d+)?\b/
-  ]
-  const combinedCheck = (input.title || '') + ' ' + (input.description || '')
-  for (const pattern of sensitivePatterns) {
-    if (pattern.test(combinedCheck)) {
-      errors.push(isEnglish ? 'Sensitive data detected. Please redact API keys, tokens, emails, and IP addresses before submitting.' : '检测到敏感数据。请在提交前脱敏 API 密钥、令牌、邮箱和 IP 地址。')
-      break
-    }
-  }
-
   return { valid: errors.length === 0, errors }
 }
 
@@ -651,7 +635,7 @@ export async function POST(req: NextRequest) {
       : SYSTEM_PROMPT + '\n\n' + buildDeveloperPrompt(spelling, watermark)
 
     const userPrompt = body.customTemplate?.trim()
-      ? `Generate a GitHub issue based on the following input:\n\nTitle: ${body.title}\nDescription: ${body.description}\nSteps: ${(body.steps || []).join('\n')}\nExpected: ${body.expected}\nActual: ${body.actual}`
+      ? `Generate a GitHub issue based on the following input:\n\nTitle: ${sanitizeSensitiveData(body.title)}\nDescription: ${sanitizeSensitiveData(body.description)}\nSteps: ${(body.steps || []).map(s => sanitizeSensitiveData(s)).join('\n')}\nExpected: ${sanitizeSensitiveData(body.expected)}\nActual: ${sanitizeSensitiveData(body.actual)}`
       : buildUserPrompt(body) + FEW_SHOT_EXAMPLES
 
     const completion = await client.chat.completions.create({
