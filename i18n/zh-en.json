@@ -59,7 +59,8 @@
       "customApiBase": "API Base URL",
       "customTemplate": "自定义 Issue 模板",
       "customTemplatePlaceholder": "输入您的自定义提示词模板...",
-      "customTemplateHint": "支持完整的系统提示词，用于生成符合团队规范的 Issue 格式"
+      "customTemplateHint": "支持完整的系统提示词，用于生成符合团队规范的 Issue 格式",
+      "minChars": "至少需要 {min} 字符（当前 {count} 字符）"
     },
     "preview": {
       "title": "Issue 预览",
@@ -208,7 +209,8 @@
       "customApiBase": "API Base URL",
       "customTemplate": "Custom Issue Template",
       "customTemplatePlaceholder": "Enter your custom prompt template...",
-      "customTemplateHint": "Full system prompt support for team-specific Issue formats"
+      "customTemplateHint": "Full system prompt support for team-specific Issue formats",
+      "minChars": "Minimum {min} characters (current: {count})"
     },
     "preview": {
       "title": "Issue Preview",

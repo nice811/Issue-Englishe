@@ -612,8 +612,20 @@ export default function Home() {
                     onChange={(e) => updateField('expected', e.target.value)}
                     placeholder={t('form.expectedPlaceholder')}
                     rows={3}
-                    className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
+                    className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent resize-none transition ${
+                      form.expected.length > 0 && form.expected.length < 10 
+                        ? 'border-amber-400 focus:ring-amber-500' 
+                        : 'border-slate-300 focus:ring-indigo-500'
+                    }`}
                   />
+                  <div className="mt-1">
+                    {form.expected.length > 0 && form.expected.length < 10 && (
+                      <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2.5 py-1">
+                        ⚠️ {t('form.minChars', { count: form.expected.length, min: 10 })}
+                      </div>
+                    )}
+                    <p className="text-xs text-slate-400 text-right">{form.expected.length} chars</p>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1.5">{t('form.actual')} <span className="text-red-500">*</span></label>
@@ -622,8 +634,20 @@ export default function Home() {
                     onChange={(e) => updateField('actual', e.target.value)}
                     placeholder={t('form.actualPlaceholder')}
                     rows={3}
-                    className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
+                    className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent resize-none transition ${
+                      form.actual.length > 0 && form.actual.length < 10 
+                        ? 'border-amber-400 focus:ring-amber-500' 
+                        : 'border-slate-300 focus:ring-indigo-500'
+                    }`}
                   />
+                  <div className="mt-1">
+                    {form.actual.length > 0 && form.actual.length < 10 && (
+                      <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2.5 py-1">
+                        ⚠️ {t('form.minChars', { count: form.actual.length, min: 10 })}
+                      </div>
+                    )}
+                    <p className="text-xs text-slate-400 text-right">{form.actual.length} chars</p>
+                  </div>
                 </div>
               </div>
 
