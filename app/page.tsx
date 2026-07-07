@@ -120,6 +120,13 @@ export default function Home() {
   const [tokenValidation, setTokenValidation] = useState<{ valid: boolean; isPro: boolean } | null>(null)
   const [deviceFingerprint, setDeviceFingerprint] = useState<string>('')
 
+  // 购买流程状态
+  const [showBuyModal, setShowBuyModal] = useState(false)
+  const [gettingCard, setGettingCard] = useState(false)
+  const [cardResult, setCardResult] = useState<{ token: string; validDays: number; generateQuota: number; expandQuota: number } | null>(null)
+  const [cardError, setCardError] = useState('')
+  const [hasPaid, setHasPaid] = useState(false)
+
   interface HistoryItem {
     id: string
     title: string
@@ -1134,20 +1141,57 @@ export default function Home() {
                       </div>
                     </div>
                   </div>
-                  <div className="pt-4 border-t border-slate-100">
-                    <div className="text-center">
-                      <p className="text-sm text-slate-600 mb-3">{t('upgrade.scanToUpgrade')}</p>
-                      <div className="w-32 h-32 mx-auto bg-white rounded-lg border border-slate-200 flex items-center justify-center mb-3 overflow-hidden">
-                        <img 
-                          src="https://img.cdn1.vip/i/6a3a03270b161_1782186791.webp" 
-                          alt="WeChat QR Code" 
-                          className="w-full h-full object-cover"
-                        />
+
+                  {process.env.NEXT_PUBLIC_FAKA_WORKER_URL ? (
+                    <div className="pt-4 border-t border-slate-100">
+                      <div className="text-center mb-4">
+                        <p className="text-sm font-semibold text-slate-700 mb-1">{t('upgrade.fakaTitle')}</p>
+                        <p className="text-xs text-slate-500">{t('upgrade.buyNowDesc')}</p>
                       </div>
-                      <p className="text-xs text-slate-500">{t('upgrade.wechatScan')}</p>
-                      <p className="text-xs text-slate-500 mt-2">{t('upgrade.orAddQQ')}</p>
+                      <button
+                        onClick={() => {
+                          setShowUpgradeModal(false)
+                          setShowBuyModal(true)
+                          setCardResult(null)
+                          setCardError('')
+                          setHasPaid(false)
+                        }}
+                        className="block w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium py-3 rounded-lg transition shadow-md text-center text-sm"
+                      >
+                        {t('upgrade.buyNow')} →
+                      </button>
                     </div>
-                  </div>
+                  ) : process.env.NEXT_PUBLIC_FAKA_URL ? (
+                    <div className="pt-4 border-t border-slate-100">
+                      <div className="text-center mb-4">
+                        <p className="text-sm font-semibold text-slate-700 mb-1">{t('upgrade.fakaTitle')}</p>
+                        <p className="text-xs text-slate-500">{t('upgrade.buyNowDesc')}</p>
+                      </div>
+                      <a
+                        href={process.env.NEXT_PUBLIC_FAKA_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium py-3 rounded-lg transition shadow-md text-center text-sm"
+                      >
+                        {t('upgrade.buyNow')} →
+                      </a>
+                    </div>
+                  ) : (
+                    <div className="pt-4 border-t border-slate-100">
+                      <div className="text-center">
+                        <p className="text-sm text-slate-600 mb-3">{t('upgrade.scanToUpgrade')}</p>
+                        <div className="w-32 h-32 mx-auto bg-white rounded-lg border border-slate-200 flex items-center justify-center mb-3 overflow-hidden">
+                          <img
+                            src="https://img.cdn1.vip/i/6a3a03270b161_1782186791.webp"
+                            alt="WeChat QR Code"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <p className="text-xs text-slate-500">{t('upgrade.wechatScan')}</p>
+                        <p className="text-xs text-slate-500 mt-2">{t('upgrade.orAddQQ')}</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -1176,6 +1220,155 @@ export default function Home() {
                   {t('preview.expandConfirmBtn')}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Buy Card Modal */}
+      {showBuyModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowBuyModal(false)}>
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-5">
+              <h3 className="text-xl font-bold text-white">{t('upgrade.buyNow')}</h3>
+              <p className="text-indigo-100 text-sm mt-1">{t('upgrade.buyNowDesc')}</p>
+            </div>
+            <div className="p-6 space-y-4">
+              {cardResult ? (
+                <div className="space-y-4">
+                  <div className="text-center">
+                    <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-3">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-emerald-600">
+                        <path d="M5 12l5 5L20 7" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </div>
+                    <h4 className="text-lg font-bold text-emerald-700">{t('upgrade.cardSuccess')}</h4>
+                  </div>
+                  <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-2">
+                    <p className="text-xs text-slate-500 font-medium">{t('upgrade.yourToken')}</p>
+                    <div className="bg-white border border-slate-200 rounded px-3 py-2 font-mono text-xs break-all text-slate-700">
+                      {cardResult.token}
+                    </div>
+                    <div className="flex gap-2 text-xs text-slate-500">
+                      <span>有效期: {cardResult.validDays} 天</span>
+                      <span>|</span>
+                      <span>生成额度: {cardResult.generateQuota === -1 ? '无限' : cardResult.generateQuota + '/天'}</span>
+                    </div>
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(cardResult.token)
+                        alert('已复制到剪贴板')
+                      }}
+                      className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition"
+                    >
+                      {t('upgrade.copyToken')}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowBuyModal(false)
+                        setCardResult(null)
+                      }}
+                      className="flex-1 px-4 py-2.5 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition"
+                    >
+                      {t('common.close')}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-semibold text-slate-700">{t('upgrade.buySteps')}</h4>
+                    <div className="space-y-1.5 text-sm text-slate-600">
+                      <p>{t('upgrade.step1', { price: '19.90' })}</p>
+                      <p>{t('upgrade.step2')}</p>
+                      <p>{t('upgrade.step3')}</p>
+                    </div>
+                  </div>
+
+                  <div className="text-center py-2">
+                    <p className="text-xs text-slate-500 mb-3">{t('upgrade.scanToPay')}</p>
+                    <div className="w-48 h-48 mx-auto rounded-lg border border-slate-200 overflow-hidden">
+                      <img
+                        src="/payment-qr.png"
+                        alt="Payment QR Code"
+                        className="w-full h-full object-contain"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {cardError && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                      <p className="text-xs text-red-700">{cardError}</p>
+                    </div>
+                  )}
+
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      onClick={() => setShowBuyModal(false)}
+                      className="flex-1 px-4 py-2.5 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition"
+                    >
+                      {t('preview.expandCancel')}
+                    </button>
+                    <button
+                      onClick={async () => {
+                        if (!hasPaid) {
+                          setHasPaid(true)
+                          return
+                        }
+                        setGettingCard(true)
+                        setCardError('')
+                        try {
+                          const workerUrl = process.env.NEXT_PUBLIC_FAKA_WORKER_URL
+                          if (!workerUrl) {
+                            throw new Error('Worker URL not configured')
+                          }
+                          const resp = await fetch(`${workerUrl}/issue`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ plan: 'pro' })
+                          })
+                          const data = await resp.json()
+                          if (!data.success) {
+                            throw new Error(data.errorZh || data.error || 'Failed to get card')
+                          }
+                          setCardResult({
+                            token: data.card.token,
+                            validDays: data.card.validDays,
+                            generateQuota: data.card.generateQuota,
+                            expandQuota: data.card.expandQuota
+                          })
+                        } catch (err) {
+                          setCardError((err as Error).message)
+                          setHasPaid(false)
+                        } finally {
+                          setGettingCard(false)
+                        }
+                      }}
+                      disabled={gettingCard}
+                      className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:bg-slate-400 disabled:cursor-not-allowed rounded-lg transition shadow-sm"
+                    >
+                      {gettingCard ? (
+                        <span className="flex items-center justify-center gap-2">
+                          <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <circle cx="12" cy="12" r="10" className="opacity-25" />
+                            <path d="M4 12a8 8 0 018-8" strokeLinecap="round" />
+                          </svg>
+                          {t('upgrade.gettingCard')}
+                        </span>
+                      ) : hasPaid ? (
+                        t('upgrade.getCard')
+                      ) : (
+                        t('upgrade.iHavePaid')
+                      )}
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>

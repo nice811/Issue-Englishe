@@ -24,7 +24,8 @@
       "expandFreeBadge": "免费",
       "expanding": "扩充中...",
       "expandRemaining": "剩余 {count} 次/天",
-      "clearDraft": "清除表单内容"
+      "clearDraft": "清除表单内容",
+      "close": "关闭"
     },
     "form": {
       "title": "标题",
@@ -104,7 +105,24 @@
       "prioritySupportDesc": "更快响应和专属支持渠道",
       "scanToUpgrade": "扫码添加客服开通 Pro",
       "wechatScan": "微信扫码添加客服",
-      "orAddQQ": "或添加 QQ: 494516063"
+      "orAddQQ": "或添加 QQ: 494516063",
+      "buyNow": "立即购买 Pro",
+      "buyNowDesc": "自动发卡，24小时无人值守",
+      "fakaTitle": "发卡网自助购买",
+      "buySteps": "购买步骤",
+      "step1": "1. 扫码支付 ¥{price}",
+      "step2": "2. 点击「我已支付」",
+      "step3": "3. 系统自动发放卡密",
+      "scanToPay": "请使用微信或支付宝扫码支付",
+      "iHavePaid": "我已支付，获取卡密",
+      "gettingCard": "正在获取卡密...",
+      "cardSuccess": "购买成功！",
+      "yourToken": "您的 Pro 令牌",
+      "copyToken": "复制令牌",
+      "payFirst": "请先完成支付",
+      "stockEmpty": "库存不足，请联系管理员",
+      "stockAvailable": "库存充足",
+      "getCard": "获取卡密"
     },
     "admin": {
       "title": "管理后台",
@@ -177,7 +195,8 @@
       "expandFreeBadge": "Free",
       "expanding": "Expanding...",
       "expandRemaining": "{count} left today",
-      "clearDraft": "Clear form"
+      "clearDraft": "Clear form",
+      "close": "Close"
     },
     "form": {
       "title": "Title",
@@ -257,7 +276,24 @@
       "prioritySupportDesc": "Faster response and dedicated support",
       "scanToUpgrade": "Scan to upgrade to Pro",
       "wechatScan": "WeChat QR Code",
-      "orAddQQ": "Or add QQ: 494516063"
+      "orAddQQ": "Or add QQ: 494516063",
+      "buyNow": "Buy Pro Now",
+      "buyNowDesc": "Auto delivery, 24/7 unattended",
+      "fakaTitle": "Self-service Purchase",
+      "buySteps": "Purchase Steps",
+      "step1": "1. Scan QR code to pay ¥{price}",
+      "step2": "2. Click 'I have paid'",
+      "step3": "3. System will deliver card automatically",
+      "scanToPay": "Please scan with WeChat or Alipay",
+      "iHavePaid": "I have paid, get my card",
+      "gettingCard": "Getting card...",
+      "cardSuccess": "Purchase successful!",
+      "yourToken": "Your Pro Token",
+      "copyToken": "Copy Token",
+      "payFirst": "Please complete payment first",
+      "stockEmpty": "Out of stock, contact admin",
+      "stockAvailable": "In stock",
+      "getCard": "Get Card"
     },
     "admin": {
       "title": "Admin Dashboard",

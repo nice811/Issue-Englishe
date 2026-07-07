@@ -1,0 +1,16 @@
+name = "issue-englisher-faka"
+main = "src/index.ts"
+compatibility_date = "2024-06-14"
+
+# D1 Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "issue-englisher-faka"
+database_id = "197651cd-49b1-4019-ae92-26b55897dda9"
+
+# Environment variables
+[vars]
+ADMIN_KEY = "3d30b13bea6ad32af0a7737d5141a2cb4d6abc05f802336afe71880fc87071e3"
+
+# CORS allowed origins (comma separated)
+ALLOWED_ORIGINS = "https://issue-englisher.vercel.app,http://localhost:3000"

@@ -1,0 +1,17 @@
+{
+  "name": "issue-englisher-faka",
+  "version": "1.0.0",
+  "description": "Cloudflare Worker for Issue Englisher card issuing system",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:create": "wrangler d1 create issue-englisher-faka",
+    "db:migrate": "wrangler d1 execute issue-englisher-faka --file=./schema.sql"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240614.0",
+    "typescript": "^5.4.0",
+    "wrangler": "^3.60.0"
+  }
+}
