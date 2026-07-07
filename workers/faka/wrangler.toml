@@ -13,4 +13,4 @@ database_id = "197651cd-49b1-4019-ae92-26b55897dda9"
 ADMIN_KEY = "3d30b13bea6ad32af0a7737d5141a2cb4d6abc05f802336afe71880fc87071e3"
 
 # CORS allowed origins (comma separated)
-ALLOWED_ORIGINS = "https://issue-englisher.vercel.app,http://localhost:3000"
+ALLOWED_ORIGINS = "https://issue-englisher.vercel.app,http://localhost:3000,https://issue-englishe.vercel.app"

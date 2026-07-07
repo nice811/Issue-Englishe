@@ -113,7 +113,6 @@ async function issueCard(
   const buyerContact = body.buyerContact || ''
   const orderNo = body.orderNo || generateOrderNo()
 
-  // 查找未使用的卡密
   const { results } = await env.DB.prepare(
     `SELECT id, token, plan, valid_days, generate_quota, expand_quota
      FROM cards
@@ -144,7 +143,6 @@ async function issueCard(
 
   const card = results[0]
 
-  // 标记卡密为已使用
   await env.DB.prepare(
     `UPDATE cards
      SET used = 1, order_no = ?, buyer_contact = ?, used_at = datetime('now')
@@ -186,7 +184,6 @@ async function checkStock(
     stock[row.plan] = row.count
   })
 
-  // 确保至少返回 pro 的库存
   if (!stock.pro) stock.pro = 0
 
   return new Response(JSON.stringify({ success: true, stock }), { headers })
@@ -242,7 +239,6 @@ async function addCards(
         .run()
       inserted++
     } catch (err) {
-      // 可能是重复 token
       duplicated++
     }
   }
@@ -271,17 +267,14 @@ async function getStats(
     )
   }
 
-  // 总卡密数
   const totalResult = await env.DB.prepare(
     'SELECT COUNT(*) as total FROM cards'
   ).first<{ total: number }>()
 
-  // 已使用
   const usedResult = await env.DB.prepare(
     'SELECT COUNT(*) as used FROM cards WHERE used = 1'
   ).first<{ used: number }>()
 
-  // 未使用（按套餐分组）
   const { results } = await env.DB.prepare(
     `SELECT plan, COUNT(*) as count
      FROM cards
